@@ -18,9 +18,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initData();
         timeTableView = findViewById(R.id.pixelGridView);
-        timeTableView.setNumColumns(6);
-        timeTableView.setNumRows(24);
-        timeTableView.setCellHeight(70);
+        timeTableView.setmNumColumns(6);
+        timeTableView.setmNumRows(24);
+        timeTableView.setmCellHeight(70);
         timeTableView.setWidthLabelHours(110);
         timeTableView.setHeightTitle(150);
         timeTableView.setmListFesEvent(mListFesEvent);
