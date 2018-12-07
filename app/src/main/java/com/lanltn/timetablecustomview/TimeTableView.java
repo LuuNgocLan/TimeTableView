@@ -34,6 +34,7 @@ public class TimeTableView extends View {
             RECT_WHITE = 100;
 
     private static final int ANIMATED_SCROLL_GAP = 250;
+
     private static final int
             MIN_CELL_WIDTH = 120,
             MAX_CELL_WIDTH = 350,
@@ -48,15 +49,36 @@ public class TimeTableView extends View {
             "FIELD OF HEAVEN",
             "ORANGE CAFE"};
 
-    private int numColumns = 6, numRows = 24;
-    private int cellWidth, cellHeight;
-    private int heightTitle, widthLabelHours;
+    private int mNumColumns;
+    private int mNumRows;
+    private int mCellWidth;
+    private int mCellHeight;
+    private int heightTitle;
+    private int widthLabelHours;
     private int mTextSizeLabel = 20;
+
     private long mLastScroll;
+
     private float offestScrollX;
     private float offsetScrollY;
     private float initialTouchX;
     private float initialTouchY;
+
+
+    private Paint mPaintLineIndicatorCurrentTime = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+    private Paint mPaintBitmapOClockIcon = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+    private Paint mPaintRectVertivalDark = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mPaintRectVerticallight = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mPaintRectEvent = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mPaintRectCurrentTime = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+    private Paint mPaintLabelHourText = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mPaintLabelHourCurrentText = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mPaintTitleHeaderText = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mPaintNameEventText = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mPaintTimeEventText = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     private Paint blackPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -81,38 +103,38 @@ public class TimeTableView extends View {
     }
 
 
-    public void setNumColumns(int numColumns) {
-        this.numColumns = numColumns;
+    public void setmNumColumns(int mNumColumns) {
+        this.mNumColumns = mNumColumns;
         calculateDimensions();
     }
 
-    public int getNumColumns() {
-        return numColumns;
+    public int getmNumColumns() {
+        return mNumColumns;
     }
 
-    public void setNumRows(int numRows) {
-        this.numRows = numRows;
+    public void setmNumRows(int mNumRows) {
+        this.mNumRows = mNumRows;
         calculateDimensions();
     }
 
-    public int getNumRows() {
-        return numRows;
+    public int getmNumRows() {
+        return mNumRows;
     }
 
-    public int getCellWidth() {
-        return cellWidth;
+    public int getmCellWidth() {
+        return mCellWidth;
     }
 
-    public void setCellWidth(int cellWidth) {
-        this.cellWidth = cellWidth;
+    public void setmCellWidth(int mCellWidth) {
+        this.mCellWidth = mCellWidth;
     }
 
-    public int getCellHeight() {
-        return cellHeight;
+    public int getmCellHeight() {
+        return mCellHeight;
     }
 
-    public void setCellHeight(int cellHeight) {
-        this.cellHeight = cellHeight;
+    public void setmCellHeight(int mCellHeight) {
+        this.mCellHeight = mCellHeight;
     }
 
     public int getHeightTitle() {
@@ -149,7 +171,7 @@ public class TimeTableView extends View {
 
     public void setFocusToTime(String time) {
         float timeFocus = convertTimeStringToHour(time);
-        scrollTo(0, (int) (getHeightTitle() + timeFocus * cellHeight / 2));
+        scrollTo(0, (int) (getHeightTitle() + timeFocus * mCellHeight / 2));
     }
 
     public void setFocusToEvent(FesEvent fesEvent) {
@@ -165,22 +187,22 @@ public class TimeTableView extends View {
 
 
     private void calculateDimensions() {
-        if (numColumns < 1 || numRows < 1) {
+        if (mNumColumns < 1 || mNumRows < 1) {
             return;
         }
 
-        cellWidth = (getWidth() - widthLabelHours) / numColumns;
+        mCellWidth = (getWidth() - widthLabelHours) / mNumColumns;
         invalidate();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
 
-        if (numColumns == 0 || numRows == 0) {
+        if (mNumColumns == 0 || mNumRows == 0) {
             return;
         }
 
-        int height = getCellHeight() * numRows;
+        int height = getmCellHeight() * mNumRows;
         int leftPaddingTimeTable = getWidthLabelHours();
         int topPaddingTimeTable = getHeightTitle();
 
@@ -195,19 +217,19 @@ public class TimeTableView extends View {
 
 
         //Draw Rect vertical
-        for (int i = 0; i < numColumns; i++) {
+        for (int i = 0; i < mNumColumns; i++) {
             if (i % 2 == 0) {
                 mPaint.setColor(getResources().getColor(R.color.colorCol));
             } else {
                 mPaint.setColor(getResources().getColor(R.color.colorColDark));
             }
 
-            mPaint.setStrokeWidth(cellWidth);
-            int start_X_line = getWidthLabelHours() + i * cellWidth;
+            mPaint.setStrokeWidth(mCellWidth);
+            int start_X_line = getWidthLabelHours() + i * mCellWidth;
             canvas.drawLine(
-                    start_X_line + cellWidth / 2,
+                    start_X_line + mCellWidth / 2,
                     0,
-                    start_X_line + cellWidth / 2,
+                    start_X_line + mCellWidth / 2,
                     height + getHeightTitle(),
                     mPaint);
 
@@ -217,22 +239,22 @@ public class TimeTableView extends View {
             blackPaint.setStrokeWidth(1);
             String[] words = titles[i].split(" ");
             for (int k = 0; k < words.length; k++) {
-                canvas.drawText(words[k], leftPaddingTimeTable + i * cellWidth + 10, 30 + k * 25, blackPaint);
+                canvas.drawText(words[k], leftPaddingTimeTable + i * mCellWidth + 10, 30 + k * 25, blackPaint);
             }
         }
 
         //draw line horizontal
         int textLabelHourMarginLeft = 20;
-        for (int i = 0; i < numRows * 6 - 1; i++) {
+        for (int i = 0; i < mNumRows * 6 - 1; i++) {
             blackPaint.setColor(getResources().getColor(R.color.colorLabelHour));
             if (i % 3 == 0) {
                 if (i % 2 == 0) {
                     blackPaint.setStrokeWidth(6);
                     canvas.drawLine(
                             leftPaddingTimeTable - 30,
-                            topPaddingTimeTable + i * cellHeight / 6 + blackPaint.getStrokeWidth() / 2,
+                            topPaddingTimeTable + i * mCellHeight / 6 + blackPaint.getStrokeWidth() / 2,
                             leftPaddingTimeTable,
-                            topPaddingTimeTable + i * cellHeight / 6 + blackPaint.getStrokeWidth() / 2,
+                            topPaddingTimeTable + i * mCellHeight / 6 + blackPaint.getStrokeWidth() / 2,
                             blackPaint);
 
                     //draw hours label
@@ -241,51 +263,51 @@ public class TimeTableView extends View {
                     canvas.drawText(
                             i / 6 + ":00",
                             textLabelHourMarginLeft,
-                            topPaddingTimeTable + i * cellHeight / 6 + blackPaint.getTextSize() / 2,
+                            topPaddingTimeTable + i * mCellHeight / 6 + blackPaint.getTextSize() / 2,
                             blackPaint);
 
                 } else {
                     blackPaint.setStrokeWidth(2);
                     canvas.drawLine(
                             leftPaddingTimeTable - 25,
-                            topPaddingTimeTable + i * cellHeight / 6,
+                            topPaddingTimeTable + i * mCellHeight / 6,
                             leftPaddingTimeTable,
-                            topPaddingTimeTable + i * cellHeight / 6,
+                            topPaddingTimeTable + i * mCellHeight / 6,
                             blackPaint);
                 }
             } else {
                 blackPaint.setStrokeWidth(2);
                 canvas.drawLine(
                         leftPaddingTimeTable - 15,
-                        topPaddingTimeTable + i * cellHeight / 6,
+                        topPaddingTimeTable + i * mCellHeight / 6,
                         leftPaddingTimeTable,
-                        topPaddingTimeTable + i * cellHeight / 6,
+                        topPaddingTimeTable + i * mCellHeight / 6,
                         blackPaint);
             }
 
         }
 
 
-        for (int i = 0; i < numRows * 6 - 1; i++) {
+        for (int i = 0; i < mNumRows * 6 - 1; i++) {
             blackPaint.setColor(getResources().getColor(R.color.colorLabelHour));
             if (i % 3 == 0) {
-                for (int col = 0; col < numColumns; col++) {
+                for (int col = 0; col < mNumColumns; col++) {
                     if (col % 2 == 0) {
                         blackPaint.setStrokeWidth(1.5f);
                         blackPaint.setAlpha(100);
                         canvas.drawLine(
-                                leftPaddingTimeTable + col * cellWidth,
-                                topPaddingTimeTable + i * cellHeight / 6,
-                                leftPaddingTimeTable + (col + 1) * cellWidth,
-                                topPaddingTimeTable + i * cellHeight / 6, blackPaint);
+                                leftPaddingTimeTable + col * mCellWidth,
+                                topPaddingTimeTable + i * mCellHeight / 6,
+                                leftPaddingTimeTable + (col + 1) * mCellWidth,
+                                topPaddingTimeTable + i * mCellHeight / 6, blackPaint);
                     } else {
                         blackPaint.setStrokeWidth(1.5f);
                         blackPaint.setAlpha(75);
                         canvas.drawLine(
-                                leftPaddingTimeTable + col * cellWidth,
-                                topPaddingTimeTable + i * cellHeight / 6,
-                                leftPaddingTimeTable + (col + 1) * cellWidth,
-                                topPaddingTimeTable + i * cellHeight / 6, blackPaint);
+                                leftPaddingTimeTable + col * mCellWidth,
+                                topPaddingTimeTable + i * mCellHeight / 6,
+                                leftPaddingTimeTable + (col + 1) * mCellWidth,
+                                topPaddingTimeTable + i * mCellHeight / 6, blackPaint);
                     }
                 }
             }
@@ -311,12 +333,12 @@ public class TimeTableView extends View {
         for (FesEvent fesEvent : mListFesEvent) {
             if (fesEvent != null) {
                 nameFes = fesEvent.getmNameFesEvent();
-                left = getWidthLabelHours() + fesEvent.getIdCol() * getCellWidth();
+                left = getWidthLabelHours() + fesEvent.getIdCol() * getmCellWidth();
                 timeFesStart = convertTimeStringToHour(fesEvent.getmStartFesEvent());
                 timeFesEnd = convertTimeStringToHour(fesEvent.getmEndFesEvent());
-                top = getHeightTitle() + timeFesStart * getCellHeight();
-                height_rect = (timeFesEnd - timeFesStart) * getCellHeight();
-                width_rect = cellWidth;
+                top = getHeightTitle() + timeFesStart * getmCellHeight();
+                height_rect = (timeFesEnd - timeFesStart) * getmCellHeight();
+                width_rect = mCellWidth;
 
                 //Draw rect card fes event
                 _mPaint = setStyleRect(fesEvent.getIdFesType());
@@ -427,8 +449,8 @@ public class TimeTableView extends View {
         blackPaint.setStrokeWidth(6);
         canvas.drawLine(
                 getWidthLabelHours() - 80,
-                getHeightTitle() + time * cellHeight + blackPaint.getStrokeWidth() / 2, getCellWidth() * 6 + getWidthLabelHours(),
-                getHeightTitle() + time * cellHeight + blackPaint.getStrokeWidth() / 2, blackPaint);
+                getHeightTitle() + time * mCellHeight + blackPaint.getStrokeWidth() / 2, getmCellWidth() * 6 + getWidthLabelHours(),
+                getHeightTitle() + time * mCellHeight + blackPaint.getStrokeWidth() / 2, blackPaint);
 
         //Rect bound of label
         blackPaint.setTextSize(mTextSizeLabel);
@@ -438,9 +460,9 @@ public class TimeTableView extends View {
         blackPaint = setStyleRect(RECT_WHITE);
         canvas.drawRoundRect(
                 10,
-                getHeightTitle() + time * cellHeight - width_bound / 2,
+                getHeightTitle() + time * mCellHeight - width_bound / 2,
                 85,
-                width_bound + getHeightTitle() + time * cellHeight,
+                width_bound + getHeightTitle() + time * mCellHeight,
                 5,
                 5,
                 blackPaint);
@@ -451,7 +473,7 @@ public class TimeTableView extends View {
         canvas.drawText(
                 labelHour,
                 20,
-                getHeightTitle() + time * cellHeight + blackPaint.getTextSize() / 2,
+                getHeightTitle() + time * mCellHeight + blackPaint.getTextSize() / 2,
                 blackPaint);
     }
 
@@ -495,7 +517,7 @@ public class TimeTableView extends View {
                     }
                 } else if (deltaX > 0) {
                     final int rightEdge = getWidth() - getPaddingRight();
-                    final int availableToScroll = getWidthLabelHours() + getNumColumns() * getCellWidth() - getScrollX() - rightEdge;
+                    final int availableToScroll = getWidthLabelHours() + getmNumColumns() * getmCellWidth() - getScrollX() - rightEdge;
                     if (availableToScroll > 0) {
                         deltaX = Math.min(availableToScroll, deltaX);
                     } else {
@@ -508,7 +530,7 @@ public class TimeTableView extends View {
                     }
                 } else if (deltaY > 0) {
                     final int bottomEdge = getHeight() - getPaddingBottom();
-                    final int availableToScroll = getHeightTitle() + getNumRows() * getCellHeight() - getScrollY() - bottomEdge;
+                    final int availableToScroll = getHeightTitle() + getmNumRows() * getmCellHeight() - getScrollY() - bottomEdge;
                     if (availableToScroll > 0) {
                         deltaY = Math.min(availableToScroll, deltaY);
                     } else {
@@ -619,10 +641,10 @@ public class TimeTableView extends View {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             float scale = detector.getScaleFactor();
-            float widthCellScale = getCellWidth() * scale;
-            float heightCellScale = getCellHeight() * scale;
-            setCellWidth((int) Math.max(MIN_CELL_WIDTH, Math.min(widthCellScale, MAX_CELL_WIDTH)));
-            setCellHeight((int) Math.max(MIN_CELL_HEIGHT, Math.min(heightCellScale, MAX_CELL_HEIGHT)));
+            float widthCellScale = getmCellWidth() * scale;
+            float heightCellScale = getmCellHeight() * scale;
+            setmCellWidth((int) Math.max(MIN_CELL_WIDTH, Math.min(widthCellScale, MAX_CELL_WIDTH)));
+            setmCellHeight((int) Math.max(MIN_CELL_HEIGHT, Math.min(heightCellScale, MAX_CELL_HEIGHT)));
             return true;
         }
 
@@ -638,7 +660,7 @@ public class TimeTableView extends View {
             Log.d(DEBUG_TAG, e.getX() + "");
             return true;
         }
-        
+
     }
 
 }
