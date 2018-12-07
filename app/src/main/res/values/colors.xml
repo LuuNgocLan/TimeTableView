@@ -3,4 +3,12 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="colorRectangle">#455A64</color>
+    <color name="colorBackground">#16171b</color>
+    <color name="colorCol">#0b0b0b</color>
+    <color name="colorColDark">#000001</color>
+    <color name="colorTitle">#efefef</color>
+    <color name="colorLabelHour">#78818a</color>
+    <color name="colorHighLine">#FFFDFDFE</color>
+
 </resources>
