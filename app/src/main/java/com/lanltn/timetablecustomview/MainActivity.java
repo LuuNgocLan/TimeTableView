@@ -21,10 +21,10 @@ public class MainActivity extends AppCompatActivity {
         timeTableView = findViewById(R.id.pixelGridView);
         timeRulerLabel = findViewById(R.id.timeRulerLabel);
 
-        timeTableView.setNumColumns(6);
-        timeTableView.setNumRows(24);
-        timeTableView.setCellHeight(70);
-        timeTableView.setWidthLabelHours(120);
+        timeTableView.setmNumColumns(6);
+        timeTableView.setmNumRows(24);
+        timeTableView.setmCellHeight(70);
+        timeTableView.setWidthLabelHours(110);
         timeTableView.setHeightTitle(150);
         timeTableView.setmListFesEvent(mListFesEvent);
         timeTableView.setFocusToTime("12:00");
