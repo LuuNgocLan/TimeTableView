@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
         timeTableView.setWidthLabelHours(110);
         timeTableView.setHeightTitle(150);
         timeTableView.setmListFesEvent(mListFesEvent);
-        timeTableView.setFocusToTime("20:00");
+        timeTableView.setFocusToTime("12:00");
 
     }
 

@@ -4,23 +4,26 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.Scroller;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Random;
 
 public class TimeTableView extends View {
 
@@ -30,8 +33,6 @@ public class TimeTableView extends View {
             FES_EVENT_WATCH = 2,
             RECT_WHITE = 100;
 
-    private static final float MIN_SCALE = 0.9f;
-    private static final float MAX_SCALE = 3.0f;
     private static final int ANIMATED_SCROLL_GAP = 250;
     private static final int
             MIN_CELL_WIDTH = 120,
@@ -52,16 +53,20 @@ public class TimeTableView extends View {
     private int heightTitle, widthLabelHours;
     private int mTextSizeLabel = 20;
     private long mLastScroll;
+    private float offestScrollX;
+    private float offsetScrollY;
     private float initialTouchX;
     private float initialTouchY;
 
     private Paint blackPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private ScaleGestureDetector mScaleDetector;
+    private GestureDetector mGestureDetector;
     private Scroller mScroller;
     private VelocityTracker mVelocityTracker;
 
     private List<FesEvent> mListFesEvent = new ArrayList<>();
+    private List<FesEventRectF> mListFesEventRectF = new ArrayList<>();
 
     public TimeTableView(Context context) {
         this(context, null);
@@ -71,6 +76,7 @@ public class TimeTableView extends View {
     public TimeTableView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mScaleDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
+        mGestureDetector = new GestureDetector(getContext(), new MyGestureListener());
         mScroller = new Scroller(getContext());
     }
 
@@ -162,6 +168,7 @@ public class TimeTableView extends View {
         if (numColumns < 1 || numRows < 1) {
             return;
         }
+
         cellWidth = (getWidth() - widthLabelHours) / numColumns;
         invalidate();
     }
@@ -291,7 +298,7 @@ public class TimeTableView extends View {
     }
 
     private void drawFesEventCard(Canvas canvas) {
-
+        mListFesEventRectF.clear();
         Paint _mPaint;
         float timeFesStart, timeFesEnd;
         String nameFes;
@@ -333,6 +340,9 @@ public class TimeTableView extends View {
                 _mPaint.setTextSize(10);
                 canvas.drawText(fesEvent.getmStartFesEvent(), left + 10, top + 15, _mPaint);
                 canvas.drawText(fesEvent.getmEndFesEvent(), left + 10, top + height_rect - 10, _mPaint);
+
+                //add rect fes to the list mFesEventOfRectF
+                mListFesEventRectF.add(new FesEventRectF(rectF, fesEvent));
             }
         }
 
@@ -449,6 +459,8 @@ public class TimeTableView extends View {
     public boolean onTouchEvent(MotionEvent event) {
 
         mScaleDetector.onTouchEvent(event);
+        mGestureDetector.onTouchEvent(event);
+
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
         }
@@ -466,6 +478,7 @@ public class TimeTableView extends View {
                 if (!mScroller.isFinished()) {
                     mScroller.abortAnimation();
                 }
+
                 break;
 
             case MotionEvent.ACTION_MOVE:
@@ -502,7 +515,9 @@ public class TimeTableView extends View {
                         deltaY = 0;
                     }
                 }
+
                 doScroll(deltaX, deltaY);
+                invalidate();
                 break;
 
             case MotionEvent.ACTION_UP:
@@ -525,6 +540,18 @@ public class TimeTableView extends View {
         invalidate();
         return true;
     }
+
+    private void detectRectFOfEventAtTouch(float posX, float posY) {
+        Random rand = new Random();
+        int timeCount = rand.nextInt(3);
+        for (FesEventRectF fesEventRectF : mListFesEventRectF) {
+            RectF rectF = fesEventRectF.getmRectFFesEvent();
+            if (rectF.contains(posX + getScrollX(), posY + getScrollY())) {
+                Toast.makeText(getContext(), timeCount + "Touch at " + fesEventRectF.getmFesEvent().getmNameFesEvent(), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
 
     /**
      * Smooth scroll by a Y delta
@@ -599,7 +626,19 @@ public class TimeTableView extends View {
             return true;
         }
 
+    }
 
+    ////////////////
+    private class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
+        private static final String DEBUG_TAG = "Gesture";
+
+        @Override
+        public boolean onDown(MotionEvent e) {
+            detectRectFOfEventAtTouch(e.getX(), e.getY());
+            Log.d(DEBUG_TAG, e.getX() + "");
+            return true;
+        }
+        
     }
 
 }
