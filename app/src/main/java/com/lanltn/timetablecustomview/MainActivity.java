@@ -25,8 +25,8 @@ public class MainActivity extends AppCompatActivity {
         timeTableView.setmNumColumns(6);
         timeTableView.setmNumRows(24);
         timeTableView.setmCellHeight(70);
-        timeTableView.setWidthLabelHours(110);
-        timeTableView.setHeightTitle(150);
+        timeTableView.setmWidthHourRuler(110);
+        timeTableView.setmHeightHeaderTimeTable(150);
         timeTableView.setmListFesEvent(mListFesEvent);
         int currentHourIn24Format = timeCurrent.get(Calendar.HOUR_OF_DAY);
         int currentMinute = timeCurrent.get(Calendar.MINUTE);
@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
             labelHour = currentHourIn24Format + ":" + currentMinute;
         }
         
-        timeTableView.setFocusToTime(labelHour);
+        timeTableView.setFocusViewToTime(labelHour);
 
     }
 
