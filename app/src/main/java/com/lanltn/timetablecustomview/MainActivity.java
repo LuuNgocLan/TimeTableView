@@ -11,7 +11,6 @@ public class MainActivity extends AppCompatActivity {
 
     private TimeTableView timeTableView;
     private List<FesEvent> mListFesEvent = new ArrayList<>();
-    private TimeRulerLabel timeRulerLabel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,7 +18,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initData();
         timeTableView = findViewById(R.id.pixelGridView);
-        timeRulerLabel = findViewById(R.id.timeRulerLabel);
 
         timeTableView.setmNumColumns(6);
         timeTableView.setmNumRows(24);
@@ -27,7 +25,6 @@ public class MainActivity extends AppCompatActivity {
         timeTableView.setWidthLabelHours(110);
         timeTableView.setHeightTitle(150);
         timeTableView.setmListFesEvent(mListFesEvent);
-        timeTableView.setFocusToTime("12:00");
 
     }
 
