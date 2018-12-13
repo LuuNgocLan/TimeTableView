@@ -14,6 +14,7 @@ import android.graphics.Region;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.ViewCompat;
@@ -26,11 +27,13 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.OverScroller;
 import android.widget.Scroller;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 import static android.graphics.Region.Op.INTERSECT;
 import static android.graphics.Region.Op.REPLACE;
@@ -40,6 +43,7 @@ public class TimetableContainer extends View {
     public static final int PLUS_HOUR_FOR_DAY = 24;
     private static final int MAXIMUM_STAGE_MT10 = 6;
     private static final int MAXIMUM_STAGE_MT20 = 20;
+    private static final int RECT_WHITE = 3;
 
     public static int MAXIMUM_HOUR_IN_DAY = 33;
 
@@ -60,7 +64,7 @@ public class TimetableContainer extends View {
     private Direction mCurrentScrollDirection = Direction.NONE;
     private Direction mCurrentFlingDirection = Direction.NONE;
 
-    private List<Event> mEvents = new ArrayList<>();
+    private List<Event> mListFesEvent = new ArrayList<>();
     private List<EventRectF> mEventRects = new ArrayList<>();
     private String[] mTitleHeader = {
             "RED MARQUEE",
@@ -75,7 +79,7 @@ public class TimetableContainer extends View {
     private float mTextTimeEvent;
 
     public void setmEvents(List<Event> mEvents) {
-        this.mEvents = mEvents;
+        this.mListFesEvent = mEvents;
     }
 
     ///scale
@@ -90,23 +94,23 @@ public class TimetableContainer extends View {
     private float mMaxHourWidth;
 
     //pain to draw line
-    private Paint mPaintLineNoStroke = new Paint();
-    private Paint mPaintLineStroke = new Paint();
-    private Paint mPaintLineLight = new Paint();
+    private Paint mPaintLineNoStroke = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mPaintLineStroke = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mPaintLineLight = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     //drawText
-    private Paint mPaintTitleText = new Paint();
-    private Paint mPaintEventTitleText = new Paint();
-    private Paint mPaintTimeText = new Paint();
-    private Paint mPaintTextFavorite = new Paint();
+    private Paint mPaintTitleText = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mPaintEventTitleText = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mPaintTimeText = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mPaintTextFavorite = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     //draw rect
-    private Paint mPaintEventNormal = new Paint();
-    private Paint mPaintEventFavorite = new Paint();
-    private Paint mPaintEventWatch = new Paint();
-    private Paint mPaintCurrentTime = new Paint();
+    private Paint mPaintEventNormal = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mPaintEventFavorite = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mPaintEventWatch = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private Paint mPaintCurrentTime = new Paint(Paint.ANTI_ALIAS_FLAG);
     //over lay
-    private Paint mPaintOverLay = new Paint();
+    private Paint mPaintOverLay = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     Calendar rightNow = Calendar.getInstance(Locale.JAPAN);
     int currentHour = rightNow.get(Calendar.HOUR_OF_DAY);
@@ -218,7 +222,6 @@ public class TimetableContainer extends View {
         setPaintCurrentTime();
         // set paint OverLay
         setPaintOverLay();
-//        mIOnClickEventItem = onClickEvent;
         mIsToday = isToday;
         mPlusHour = plusHour;
         currentHour += mPlusHour;
@@ -234,6 +237,10 @@ public class TimetableContainer extends View {
         }
     }
 
+
+    public void setmIOnClickEventItem(IOnTimeTableClickEvent mIOnClickEventItem) {
+        this.mIOnClickEventItem = mIOnClickEventItem;
+    }
 
     private void setTextTimeEvent(int size) {
         mTextTimeEvent = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
@@ -337,16 +344,14 @@ public class TimetableContainer extends View {
         drawHeaderRowAndEvents(canvas);
         drawTime(canvas);
         if (mIsToday) {
-            drawCurrentTime(mCanvas);
+//            drawCurrentTime(mCanvas);
+            drawIndicatorLineWithCurrentTime(canvas);
         }
     }
 
     private void drawHeaderRowAndEvents(Canvas canvas) {
-        Paint paintEvenBg = new Paint();
-        paintEvenBg.setColor(getResources().getColor(R.color.colorCol));
-        Paint paintOddBg = new Paint();
-        paintOddBg.setColor(getResources().getColor(R.color.colorColDark));
-        // tinh toan lai kich thuoc khi scale qua lon hoac qua nho
+
+        // Calculate size each event
         if (mNewHeightEachEvent > 0) {
             if (mNewHeightEachEvent < mEffectiveMinHourHeight) {
                 mNewHeightEachEvent = mEffectiveMinHourHeight;
@@ -367,20 +372,16 @@ public class TimetableContainer extends View {
             mNewWidthEachEvent = -1;
         }
 
-        //tinh do chia nho nhat
+
         mNormalDistance = mHeightEachEvent / TOTAL_DISTANCE_EACH_NORNAL_TIME_STONE;
-        //Tinh toan tuong doi giua kich thuoc event card va kich thuoc chu
+
         if (mWidthEachEvent < mMaxHourWidth / 2 || mHeightEachEvent < mMaxHourHeight / 2) {
-            setTextTimeEvent(3); //set text luc event card normal
+            setTextTimeEvent(3);
             mPaintTimeText.setTextSize(mTextTimeEvent);
         } else if (mWidthEachEvent >= mMaxHourWidth / 2 || mHeightEachEvent >= mMaxHourHeight / 2) {
-            setTextTimeEvent(9);//set text lucs event card large
+            setTextTimeEvent(9);
             mPaintTimeText.setTextSize(mTextTimeEvent);
         }
-        /**
-         *  mCurrentOrigin  chua biet dung de lam gi??
-         *4:52: mCurrentOrigin coi nhu vi tri cuoi cung scroll toi
-         */
 
         // If the new mCurrentOrigin.y is invalid, make it valid.
         if (mCurrentOrigin.y < getHeight() - mHeightEachEvent * MAXIMUM_HOUR_IN_DAY - mHeightHeader - mMinMargin)
@@ -402,29 +403,12 @@ public class TimetableContainer extends View {
          * Rect contain content TimeTable
          */
         canvas.clipRect(mWidthHeader, mHeightHeader, mWidthEventContainer, getHeight(), Region.Op.REPLACE);
-        //startY  = chieu cao header + vi cuoi cung.y
-        float startY = mHeightHeader + mCurrentOrigin.y;
-        //duyet tat ca cac stage?? chua biet la gi?
-        /**
-         * stage la list cac title header, co bao nhieu duyet bay nhieu
-         */
-        for (int i = 0; i < 6; i++) {
-            //xac dinh vi tri de ve cac background tai thoi diem hien tai
-            int dx = (int) (mCurrentOrigin.x + mWidthEachEvent * i + mWidthHeader);
-            // ve cac hinh chu nhat voi mau dam nhat xen  ke nhau
-            if (i % 2 == 0) {
-                //vi tri chan
-                canvas.drawRect(dx, startY, dx + mWidthEachEvent, getHeight(), paintEvenBg);
-            } else {
-                //vi tri le
-                canvas.drawRect(dx, startY, dx + mWidthEachEvent, getHeight(), paintOddBg);
-            }
-        }
 
-        //save Rect event for action click
-        mEventRects.clear();
-        for (int i = 0; i < 6; i++) {
-            //check cot co su kien
+        drawRectVerticalBackgroundTimeTable(canvas, getHeight());
+
+//        mEventRects.clear();
+//        for (int i = 0; i < 6; i++) {
+        //check cot co su kien
 //            if (mStages.get(i).getEvents() != null && mStages.get(i).getEvents().size() != 0) {
 //                //duyet tat ca cac su kien trong cot do
 //                for (int j = 0; j < mStages.get(i).getEvents().size(); j++) {
@@ -432,7 +416,7 @@ public class TimetableContainer extends View {
 //                    mEventRects.add(new EventRect(null, mStages.get(i).getEvents().get(j)));
 //                }
 //            }
-        }
+//        }
 
         //duyet moc thoi gian tu 0->33
         for (int hourNumber = 0; hourNumber < MAXIMUM_HOUR_IN_DAY; hourNumber++) {
@@ -447,7 +431,8 @@ public class TimetableContainer extends View {
                         (int) top + mHeightEachEvent / 2, mPaintLineLight);
             }
         }
-        //
+
+
         for (int hourNumber = 0; hourNumber < MAXIMUM_HOUR_IN_DAY; hourNumber++) {
             float top = mCurrentOrigin.y + mHeightEachEvent * hourNumber + mMinMargin + mHeightHeader;
             int dx = (int) (mCurrentOrigin.x + mWidthHeader);
@@ -477,11 +462,76 @@ public class TimetableContainer extends View {
         }
 
         /**
+         * Draw card event
+         */
+        drawFesEventCard(canvas);
+
+        /**
          * Draw First row title header TimeTable
          */
+        drawHeaderTimeTable(canvas);
+    }
 
+    private void drawIndicatorLineWithCurrentTime(Canvas canvas) {
+        float startX, startY;
+        //get current time
+        Calendar timeCurrent = Calendar.getInstance();
+        int currentHourIn24Format = timeCurrent.get(Calendar.HOUR_OF_DAY);
+        int currentMinute = timeCurrent.get(Calendar.MINUTE);
+
+        //Create label hour
+        String labelHour;
+        if (currentMinute < 10) {
+            labelHour = currentHourIn24Format + ":0" + currentMinute;
+        } else {
+            labelHour = currentHourIn24Format + ":" + currentMinute;
+        }
+
+        float time = currentHourIn24Format + currentMinute * 1.0f / 60; //EX: current time is 5 o'clock
+
+        Paint mPaintLineWhite = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mPaintLineWhite.setColor(getResources().getColor(R.color.colorHighLine));
+        mPaintLineWhite.setStrokeWidth(6);
+        startX = mWidthHeader - 80;
+        startY = mCurrentOrigin.y + mHeightHeader + time * mHeightEachEvent + mPaintLineWhite.getStrokeWidth() / 2 + mMinMargin;
+        canvas.drawLine(
+                startX,
+                startY,
+                mWidthEachEvent * 6 + mWidthHeader,
+                startY,
+                mPaintLineWhite);
+
+        //Rect bound of label
+        mPaintLineWhite.setStyle(Paint.Style.FILL);
+        mPaintLineWhite.setTextSize(mTextTimeRuler);
+        mPaintLineWhite.setStrokeWidth(1);
+
+        int width_bound = (int) mPaintLineWhite.getTextSize() + 2;
+        mPaintLineWhite = setStyleRectEvent(RECT_WHITE);
+        startX = 10;
+        startY = mCurrentOrigin.y + mHeightHeader + time * mHeightEachEvent - width_bound / 2 + mMinMargin;
+        float bottom = width_bound + mCurrentOrigin.y + mHeightHeader + time * mHeightEachEvent + mMinMargin;
+        canvas.drawRoundRect(startX, startY, 85, bottom, 5, 5, mPaintLineWhite);
+
+        mPaintLineWhite.setTextSize(mTextTimeRuler);
+        mPaintLineWhite.setStrokeWidth(1);
+        mPaintLineWhite.setColor(getResources().getColor(R.color.colorAccent));
+        float dy = mCurrentOrigin.y + mHeightHeader + time * mHeightEachEvent + mPaintLineWhite.getTextSize() / 2 + mMinMargin;
+        canvas.drawText(
+                labelHour,
+                20,
+                dy,
+                mPaintLineWhite);
+    }
+
+    private void drawHeaderTimeTable(Canvas canvas) {
         Paint bgPaintHeader = new Paint();
         bgPaintHeader.setColor(Color.BLACK);
+        Paint paintEvenBg = new Paint();
+        paintEvenBg.setColor(getResources().getColor(R.color.colorCol));
+        Paint paintOddBg = new Paint();
+        paintOddBg.setColor(getResources().getColor(R.color.colorColDark));
+
         canvas.clipRect(mWidthHeader, 0, mWidthEventContainer, mHeightHeader, Region.Op.REPLACE);
         canvas.drawRect(mWidthHeader, 0, mWidthEventContainer, mHeightHeader, bgPaintHeader);
 
@@ -503,6 +553,153 @@ public class TimetableContainer extends View {
 
         }
 //    }
+    }
+
+    private void drawRectVerticalBackgroundTimeTable(Canvas canvas, int heightTimeTable) {
+        Paint mPaint = new Paint();
+        mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        float startY = mHeightHeader + mCurrentOrigin.y;
+        for (int i = 0; i < 6; i++) {
+            if (i % 2 == 0) {
+                mPaint.setColor(getResources().getColor(R.color.colorCol));
+            } else {
+                mPaint.setColor(getResources().getColor(R.color.colorColDark));
+            }
+
+            mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+            int dx = (int) (mCurrentOrigin.x + mWidthEachEvent * i + mWidthHeader);
+            canvas.drawRect(
+                    dx,
+                    startY,
+                    dx + mWidthEachEvent,
+                    heightTimeTable,
+                    mPaint);
+        }
+
+    }
+
+    private void drawFesEventCard(Canvas canvas) {
+        mEventRects.clear();
+        Paint _mPaint = new Paint();
+        float timeFesStart, timeFesEnd;
+        String nameFes;
+        float
+                left,
+                top,
+                height_rect,
+                width_rect;
+
+        for (Event fesEvent : mListFesEvent) {
+            if (fesEvent != null) {
+
+                nameFes = fesEvent.getmNameEvent();
+
+                left = mCurrentOrigin.x + mWidthHeader + fesEvent.getIdCol() * mWidthEachEvent;
+                timeFesStart = convertTimeStringToHour(fesEvent.getmStartEvent());
+                timeFesEnd = convertTimeStringToHour(fesEvent.getmEndEvent());
+                top = mCurrentOrigin.y + mHeightHeader + timeFesStart * mHeightEachEvent + mMinMargin;
+                height_rect = (timeFesEnd - timeFesStart) * mHeightEachEvent;
+                width_rect = mWidthEachEvent;
+
+                /**
+                 * Draw Event card
+                 */
+                _mPaint = setStyleRectEvent(fesEvent.getIdType());
+
+                Rect rect = new Rect((int) left, (int) top, (int) (left + width_rect), (int) (top + height_rect));
+                RectF rectF = new RectF(rect);
+                canvas.drawRoundRect(
+                        rectF,
+                        10,
+                        10,
+                        _mPaint);
+
+                //Draw name of fes event center rectangle
+                _mPaint = setStyleText(fesEvent.getIdType());
+                drawTextCenterOfRect(canvas, _mPaint, nameFes, left, top, width_rect, height_rect);
+
+                //Draw time begin and time end of fes event
+                _mPaint.setColor(Color.WHITE);
+                _mPaint.setStrokeWidth(1);
+                _mPaint.setTextSize(10);
+                canvas.drawText(fesEvent.getmStartEvent(), left + 10, top + 15, _mPaint);
+                canvas.drawText(fesEvent.getmEndEvent(), left + 10, top + height_rect - 10, _mPaint);
+
+                //add rect fes to the list mFesEventOfRectF
+                mEventRects.add(new EventRectF(rectF, fesEvent));
+            }
+        }
+
+    }
+
+    /**
+     * Draw text in center
+     *
+     * @param canvas
+     * @param paint
+     * @param text
+     * @param posX
+     * @param posY
+     * @param with_rect
+     * @param height_rect
+     */
+    private void drawTextCenterOfRect(Canvas canvas, Paint paint, String text, float posX, float posY, float with_rect, float height_rect) {
+        Rect rectBoundText = new Rect();
+        paint.setTextAlign(Paint.Align.LEFT);
+        paint.getTextBounds(text, 0, text.length(), rectBoundText);
+        float offsetX = with_rect / 2f - rectBoundText.width() / 2f;
+        float offsetY = height_rect / 2f + rectBoundText.height() / 2f;
+        canvas.drawText(text, posX + offsetX, posY + offsetY, paint);
+    }
+
+    public Paint setStyleRectEvent(int idStyle) {
+        Paint _mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        _mPaint.setStrokeWidth(2);
+        switch (idStyle) {
+            case 0:
+                _mPaint.setStyle(Paint.Style.STROKE);
+                _mPaint.setColor(Color.WHITE);
+                break;
+            case 1:
+                _mPaint.setStyle(Paint.Style.STROKE);
+                _mPaint.setColor(getResources().getColor(R.color.colorAccent));
+                break;
+            case 2:
+                _mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+                _mPaint.setColor(getResources().getColor(R.color.colorAccent));
+                break;
+            case 3:
+                _mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+                _mPaint.setColor(Color.WHITE);
+                break;
+        }
+        return _mPaint;
+    }
+
+    public Paint setStyleText(int idStyle) {
+        Paint _mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        _mPaint.setStrokeWidth(3);
+        _mPaint.setStyle(Paint.Style.FILL);
+        _mPaint.setTextSize(27);
+        switch (idStyle) {
+            case 0:
+                _mPaint.setColor(Color.WHITE);
+                break;
+            case 1:
+                _mPaint.setColor(getResources().getColor(R.color.colorAccent));
+                break;
+            case 2:
+                _mPaint.setColor(Color.WHITE);
+                break;
+        }
+        return _mPaint;
+    }
+
+    public float convertTimeStringToHour(String time) {
+        String[] timeParts = time.split(":");
+        int hour = Integer.parseInt(timeParts[0]);
+        int minute = Integer.parseInt(timeParts[1]);
+        return hour + minute * 1.0f / 60;
     }
 
     private String getTextForStageBound(String stageName, float mWidthEachEvent) {
@@ -564,7 +761,8 @@ public class TimetableContainer extends View {
     }
 
     /**
-     * Draw Left header Time
+     * Draw Left header Time stone
+     *
      * @param canvas
      */
     private void drawTime(Canvas canvas) {
@@ -679,7 +877,7 @@ public class TimetableContainer extends View {
     }
 
     /**
-     * draw O'clock
+     * draw O'clock Bitmap
      */
     private void drawIconBitmapOlockAtTopLeftTimeTable(Canvas canvas) {
         Paint paintOclock = new Paint();
@@ -981,6 +1179,8 @@ public class TimetableContainer extends View {
         public boolean onDown(MotionEvent e) {
             mScroller.forceFinished(true);
             mStickyScroller.forceFinished(true);
+
+            invalidated();
             return true;
         }
 
@@ -1024,47 +1224,47 @@ public class TimetableContainer extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (!mIsScale) {
-//            for (FesEventRectF eventRect : mEventRects) {
-//                if (eventRect.getRect() != null) {
-//                    if (eventRect.getRect().contains(event.getX(), event.getY())) {
-//                        switch (event.getAction()) {
-//                            case MotionEvent.ACTION_DOWN:
-//                                mRectFPress = eventRect.getRect();
-//                                mIsPressDown = true;
-//                                invalidate();
-//                                break;
-//                            case MotionEvent.ACTION_UP:
-//                                mIsPressDown = false;
-//                                mCountEventPress = 0;
-//                                invalidate();
-//                                if (isSingleClick()) {
-//                                    mIOnClickEventItem.clickEventItem(eventRect.getEvent());
-//                                }
-//                                break;
-//                            case MotionEvent.ACTION_CANCEL:
-//                                new Handler().postDelayed(new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        mIsPressDown = false;
-//                                        mCountEventPress = 0;
-//                                        invalidate();
-//                                    }
-//                                }, 1000);
-//                                break;
-//                            case MotionEvent.ACTION_MOVE:
-//                                new Handler().postDelayed(new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        mIsPressDown = false;
-//                                        mCountEventPress = 0;
-//                                        invalidate();
-//                                    }
-//                                }, 1000);
-//                                break;
-//                        }
-//                    }
-//                }
-//            }
+            for (EventRectF eventRect : mEventRects) {
+                if (eventRect.getmRectFEvent() != null) {
+                    if (eventRect.getmRectFEvent().contains(event.getX(), event.getY())) {
+                        switch (event.getAction()) {
+                            case MotionEvent.ACTION_DOWN:
+                                mRectFPress = eventRect.getmRectFEvent();
+                                mIsPressDown = true;
+                                invalidate();
+                                break;
+                            case MotionEvent.ACTION_UP:
+                                mIsPressDown = false;
+                                mCountEventPress = 0;
+                                invalidate();
+                                if (isSingleClick()) {
+                                    mIOnClickEventItem.clickEventItem(eventRect.getmEvent());
+                                }
+                                break;
+                            case MotionEvent.ACTION_CANCEL:
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mIsPressDown = false;
+                                        mCountEventPress = 0;
+                                        invalidate();
+                                    }
+                                }, 1000);
+                                break;
+                            case MotionEvent.ACTION_MOVE:
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mIsPressDown = false;
+                                        mCountEventPress = 0;
+                                        invalidate();
+                                    }
+                                }, 1000);
+                                break;
+                        }
+                    }
+                }
+            }
         }
         mScaleDetector.onTouchEvent(event);
         boolean val = mGestureDetector.onTouchEvent(event);
@@ -1075,6 +1275,7 @@ public class TimetableContainer extends View {
         if (event.getAction() == MotionEvent.ACTION_UP && mIsScale) {
             mIsScale = false;
         }
+        invalidated();
         return val;
     }
 
@@ -1083,6 +1284,18 @@ public class TimetableContainer extends View {
         long transcureTime = clickTime - lastClickTime;
         lastClickTime = clickTime;
         return transcureTime > DOUBLE_CLICK_TIME_DELTA;
+    }
+
+    private void detectRectFOfEventAtTouch(float posX, float posY) {
+        Random rand = new Random();
+        int timeCount = rand.nextInt(3);
+        for (EventRectF fesEventRectF : mEventRects) {
+            RectF rectF = fesEventRectF.getmRectFEvent();
+            if (rectF.contains(posX + getScrollX(), posY + getScrollY())) {
+
+                Toast.makeText(getContext(), timeCount + "Touch at " + fesEventRectF.getmEvent().getmNameEvent(), Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     @Override

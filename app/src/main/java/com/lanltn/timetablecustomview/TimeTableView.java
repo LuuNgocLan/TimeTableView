@@ -363,56 +363,56 @@ public class TimeTableView extends View {
 
     }
 
-    private void drawFesEventCard(Canvas canvas) {
-        mListFesEventRectF.clear();
-        Paint _mPaint;
-        float timeFesStart, timeFesEnd;
-        String nameFes;
-        float
-                left,
-                top,
-                height_rect,
-                width_rect;
+private void drawFesEventCard(Canvas canvas) {
+    mListFesEventRectF.clear();
+    Paint _mPaint;
+    float timeFesStart, timeFesEnd;
+    String nameFes;
+    float
+            left,
+            top,
+            height_rect,
+            width_rect;
 
-        for (Event fesEvent : mListFesEvent) {
-            if (fesEvent != null) {
-                nameFes = fesEvent.getmNameEvent();
-                left = getmWidthHourRuler() + fesEvent.getIdCol() * getmCellWidth();
-                timeFesStart = convertTimeStringToHour(fesEvent.getmStartEvent());
-                timeFesEnd = convertTimeStringToHour(fesEvent.getmEndEvent());
-                top = mPaddingBottomHeader + getmHeightHeaderTimeTable() + timeFesStart * getmCellHeight();
-                height_rect = (timeFesEnd - timeFesStart) * getmCellHeight();
-                width_rect = mCellWidth;
+    for (Event fesEvent : mListFesEvent) {
+        if (fesEvent != null) {
+            nameFes = fesEvent.getmNameEvent();
+            left = getmWidthHourRuler() + fesEvent.getIdCol() * getmCellWidth();
+            timeFesStart = convertTimeStringToHour(fesEvent.getmStartEvent());
+            timeFesEnd = convertTimeStringToHour(fesEvent.getmEndEvent());
+            top = mPaddingBottomHeader + getmHeightHeaderTimeTable() + timeFesStart * getmCellHeight();
+            height_rect = (timeFesEnd - timeFesStart) * getmCellHeight();
+            width_rect = mCellWidth;
 
-                //Draw rect card fes event
-                _mPaint = setStyleRect(fesEvent.getIdType());
+            //Draw rect card fes event
+            _mPaint = setStyleRect(fesEvent.getIdType());
 
-                //Support with api >= 21
-                Rect rect = new Rect((int) left, (int) top, (int) (left + width_rect), (int) (top + height_rect));
-                RectF rectF = new RectF(rect);
-                canvas.drawRoundRect(
-                        rectF,
-                        10,
-                        10,
-                        _mPaint);
+            //Support with api >= 21
+            Rect rect = new Rect((int) left, (int) top, (int) (left + width_rect), (int) (top + height_rect));
+            RectF rectF = new RectF(rect);
+            canvas.drawRoundRect(
+                    rectF,
+                    10,
+                    10,
+                    _mPaint);
 
-                //Draw name of fes event center rectangle
-                _mPaint = setStyleText(fesEvent.getIdType());
-                drawTextCenterOfRect(canvas, _mPaint, nameFes, left, top, width_rect, height_rect);
+            //Draw name of fes event center rectangle
+            _mPaint = setStyleText(fesEvent.getIdType());
+            drawTextCenterOfRect(canvas, _mPaint, nameFes, left, top, width_rect, height_rect);
 
-                //Draw time begin and time end of fes event
-                _mPaint.setColor(Color.WHITE);
-                _mPaint.setStrokeWidth(1);
-                _mPaint.setTextSize(10);
-                canvas.drawText(fesEvent.getmStartEvent(), left + 10, top + 15, _mPaint);
-                canvas.drawText(fesEvent.getmEndEvent(), left + 10, top + height_rect - 10, _mPaint);
+            //Draw time begin and time end of fes event
+            _mPaint.setColor(Color.WHITE);
+            _mPaint.setStrokeWidth(1);
+            _mPaint.setTextSize(10);
+            canvas.drawText(fesEvent.getmStartEvent(), left + 10, top + 15, _mPaint);
+            canvas.drawText(fesEvent.getmEndEvent(), left + 10, top + height_rect - 10, _mPaint);
 
-                //add rect fes to the list mFesEventOfRectF
-                mListFesEventRectF.add(new EventRectF(rectF, fesEvent));
-            }
+            //add rect fes to the list mFesEventOfRectF
+            mListFesEventRectF.add(new EventRectF(rectF, fesEvent));
         }
-
     }
+
+}
 
 
     private void drawTextAndBreakLine(final Canvas canvas, final Paint paint,

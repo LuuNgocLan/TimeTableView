@@ -3,6 +3,7 @@ package com.lanltn.timetablecustomview;
 import android.graphics.RectF;
 
 public class EventRectF {
+
     private RectF mRectFEvent;
     private Event mEvent;
 

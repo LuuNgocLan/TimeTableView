@@ -3,19 +3,19 @@ package com.lanltn.timetablecustomview;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TimetableContainer.IOnTimeTableClickEvent{
 
     private TimeTableView timeTableView;
     private List<Event> mListFesEvent = new ArrayList<>();
     //current time
     private Calendar timeCurrent = Calendar.getInstance();
     private TimetableContainer timetableContainer;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
         initData();
         timetableContainer = findViewById(R.id.timeTableContainer);
         timetableContainer.setmEvents(mListFesEvent);
+        timetableContainer.setmIOnClickEventItem(this);
 //        timeTableView = findViewById(R.id.pixelGridView);
 //
 //        timeTableView.setmNumColumns(6);
@@ -62,4 +63,14 @@ public class MainActivity extends AppCompatActivity {
         mListFesEvent.add(new Event("Micha", "21:30", "23:00", 3, 1));
     }
 
+    @Override
+    public void clickEventItem(Event event) {
+        Toast.makeText(this,"YOUR CLICK ON "+event.getmNameEvent(),Toast.LENGTH_SHORT).show();
+
+    }
+
+    @Override
+    public void updateCurrentTime() {
+
+    }
 }
