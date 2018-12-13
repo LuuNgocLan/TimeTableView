@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">CustomView</string>
+    <string name="app_name">TimeTable</string>
     <string name="sun">Sun</string>
     <string name="mon">Mon</string>
     <string name="tue">Tue</string>
