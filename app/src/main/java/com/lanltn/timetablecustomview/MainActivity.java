@@ -14,31 +14,34 @@ public class MainActivity extends AppCompatActivity {
     private List<Event> mListFesEvent = new ArrayList<>();
     //current time
     private Calendar timeCurrent = Calendar.getInstance();
+    private TimetableContainer timetableContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initData();
-        timeTableView = findViewById(R.id.pixelGridView);
-
-        timeTableView.setmNumColumns(6);
-        timeTableView.setmNumRows(24);
-        timeTableView.setmCellHeight(70);
-        timeTableView.setmWidthHourRuler(110);
-        timeTableView.setmHeightHeaderTimeTable(150);
-        timeTableView.setmListFesEvent(mListFesEvent);
-        int currentHourIn24Format = timeCurrent.get(Calendar.HOUR_OF_DAY);
-        int currentMinute = timeCurrent.get(Calendar.MINUTE);
-        //Create label hour
-        String labelHour;
-        if (currentMinute < 10) {
-            labelHour = currentHourIn24Format + ":0" + currentMinute;
-        } else {
-            labelHour = currentHourIn24Format + ":" + currentMinute;
-        }
-        
-        timeTableView.setFocusViewToTime(labelHour);
+        timetableContainer = findViewById(R.id.timeTableContainer);
+        timetableContainer.setmEvents(mListFesEvent);
+//        timeTableView = findViewById(R.id.pixelGridView);
+//
+//        timeTableView.setmNumColumns(6);
+//        timeTableView.setmNumRows(24);
+//        timeTableView.setmCellHeight(70);
+//        timeTableView.setmWidthHourRuler(110);
+//        timeTableView.setmHeightHeaderTimeTable(150);
+//        timeTableView.setmListFesEvent(mListFesEvent);
+//        int currentHourIn24Format = timeCurrent.get(Calendar.HOUR_OF_DAY);
+//        int currentMinute = timeCurrent.get(Calendar.MINUTE);
+//        //Create label hour
+//        String labelHour;
+//        if (currentMinute < 10) {
+//            labelHour = currentHourIn24Format + ":0" + currentMinute;
+//        } else {
+//            labelHour = currentHourIn24Format + ":" + currentMinute;
+//        }
+//
+//        timeTableView.setFocusViewToTime(labelHour);
 
     }
 

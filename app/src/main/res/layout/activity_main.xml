@@ -4,10 +4,14 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.lanltn.timetablecustomview.TimeTableView
-        android:id="@+id/pixelGridView"
+    <!--<com.lanltn.timetablecustomview.TimeTableView-->
+    <!--android:id="@+id/pixelGridView"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:background="@color/colorBackground" />-->
+    <com.lanltn.timetablecustomview.TimetableContainer
+        android:id="@+id/timeTableContainer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorBackground" />
+        android:layout_height="wrap_content" />
 
 </LinearLayout>
