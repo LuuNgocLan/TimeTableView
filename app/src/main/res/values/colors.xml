@@ -10,5 +10,6 @@
     <color name="colorTitle">#efefef</color>
     <color name="colorLabelHour">#78818a</color>
     <color name="colorHighLine">#FFFDFDFE</color>
+    <color name="bg_overlay_color">#123456</color>
 
 </resources>

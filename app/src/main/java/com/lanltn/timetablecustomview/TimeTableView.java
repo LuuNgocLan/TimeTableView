@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
@@ -66,6 +67,7 @@ public class TimeTableView extends View {
 
     private float mLastScroll;
     private boolean isScalling;
+    private PointF mCurrentOrigin = new PointF(0, 0);
 
     private Paint mPaintLineIndicatorCurrentTime = new Paint(Paint.ANTI_ALIAS_FLAG);
 
@@ -143,71 +145,81 @@ public class TimeTableView extends View {
         int heightContentTimeTable = mCellHeight * mNumRows;
         int widthContentTimeTable = mCellWidth * mNumColumns;
 
-        canvas.drawColor(Color.BLACK);
-        canvas.translate(0, 0);
-        canvas.clipRect(0, 0,
-                mWidthHourRuler + widthContentTimeTable,
-                mHeightHeaderTimeTable + heightContentTimeTable,
-                REPLACE);
-        canvas.drawColor(Color.BLACK);
-        canvas.save(); //Save current state of clip - state #1
-        canvas.restore();//restore state #1
+//        canvas.drawColor(Color.BLACK);
+//        canvas.translate(0, 0);
+//        canvas.clipRect(0, 0,
+//                mWidthHourRuler + widthContentTimeTable,
+//                mHeightHeaderTimeTable + heightContentTimeTable,
+//                REPLACE);
+//        canvas.drawColor(Color.BLACK);
+//        canvas.save(); //Save current state of clip - state #1
+//        canvas.restore();//restore state #1
+//
+//        switch (mCurrentScrollDirection) {
+//            case VERTICAL:
+//                canvas.clipRect(0, 0,
+//                        mWidthHourRuler + widthContentTimeTable,
+//                        mHeightHeaderTimeTable + heightContentTimeTable,
+//                        REPLACE);
+//                //Content timetable
+//                drawRectVerticalBackgroundTimeTable(canvas, heightContentTimeTable);
+//                drawLineHorizontalBackgroundTimeTableWithOpacity(canvas);
+//                drawTimeRulerLeftTimeTable(canvas);
+//                drawFesEventCard(canvas);
+//                drawIndicatorLineWithCurrentTime(canvas);
+//                canvas.restore();
+//                canvas.save();
+//                //pin HeaderTitle and bitmap at top
+//                canvas.translate(0, 0);
+//                drawTitleHeaderTimetable(canvas);
+//                drawIconBitmapOlockAtTopLeftTimeTable(canvas);
+//                break;
+//            case HORIZONTAL:
+//                canvas.clipRect(0, 0,
+//                        mWidthHourRuler + widthContentTimeTable,
+//                        mHeightHeaderTimeTable + heightContentTimeTable,
+//                        REPLACE);
+//                //Content timetable
+//                drawRectVerticalBackgroundTimeTable(canvas, heightContentTimeTable);
+//                drawLineHorizontalBackgroundTimeTableWithOpacity(canvas);
+//                drawTitleHeaderTimetable(canvas);
+//                drawFesEventCard(canvas);
+//                drawIndicatorLineWithCurrentTime(canvas);
+//                canvas.restore();
+//                canvas.save();
+//                //pin RulerTime and bitmap at left
+//                canvas.translate(0, 0);
+//                drawTimeRulerLeftTimeTable(canvas);
+//                drawIconBitmapOlockAtTopLeftTimeTable(canvas);
+//
+//                break;
+//            case NONE:
+//                canvas.save();
+//                canvas.clipRect(0, 0,
+//                        mWidthHourRuler + widthContentTimeTable,
+//                        mHeightHeaderTimeTable + heightContentTimeTable,
+//                        REPLACE);
+//                //Content timetable
+//                canvas.save();
+//                drawRectVerticalBackgroundTimeTable(canvas, heightContentTimeTable);
+//                drawLineHorizontalBackgroundTimeTableWithOpacity(canvas);
+//                drawTimeRulerLeftTimeTable(canvas);
+//                drawTitleHeaderTimetable(canvas);
+//                drawIconBitmapOlockAtTopLeftTimeTable(canvas);
+//                drawFesEventCard(canvas);
+//                drawIndicatorLineWithCurrentTime(canvas);
+//                break;
+//        }
+        //TODO:13/12/2018
 
-        switch (mCurrentScrollDirection) {
-            case VERTICAL:
-                canvas.clipRect(0, 0,
-                        mWidthHourRuler + widthContentTimeTable,
-                        mHeightHeaderTimeTable + heightContentTimeTable,
-                        REPLACE);
-                //Content timetable
-                drawRectVerticalBackgroundTimeTable(canvas, heightContentTimeTable);
-                drawLineHorizontalBackgroundTimeTableWithOpacity(canvas);
-                drawTimeRulerLeftTimeTable(canvas);
-                drawFesEventCard(canvas);
-                drawIndicatorLineWithCurrentTime(canvas);
-                canvas.restore();
-                canvas.save();
-                //pin HeaderTitle and bitmap at top
-                canvas.translate(0, 0);
-                drawTitleHeaderTimetable(canvas);
-                drawIconBitmapOlockAtTopLeftTimeTable(canvas);
-                break;
-            case HORIZONTAL:
-                canvas.clipRect(0, 0,
-                        mWidthHourRuler + widthContentTimeTable,
-                        mHeightHeaderTimeTable + heightContentTimeTable,
-                        REPLACE);
-                //Content timetable
-                drawRectVerticalBackgroundTimeTable(canvas, heightContentTimeTable);
-                drawLineHorizontalBackgroundTimeTableWithOpacity(canvas);
-                drawTitleHeaderTimetable(canvas);
-                drawFesEventCard(canvas);
-                drawIndicatorLineWithCurrentTime(canvas);
-                canvas.restore();
-                canvas.save();
-                //pin RulerTime and bitmap at left
-                canvas.translate(0, 0);
-                drawTimeRulerLeftTimeTable(canvas);
-                drawIconBitmapOlockAtTopLeftTimeTable(canvas);
+        drawRectVerticalBackgroundTimeTable(canvas, heightContentTimeTable);
+        drawLineHorizontalBackgroundTimeTableWithOpacity(canvas);
+        drawTimeRulerLeftTimeTable(canvas);
+        drawTitleHeaderTimetable(canvas);
+        drawIconBitmapOlockAtTopLeftTimeTable(canvas);
+        drawFesEventCard(canvas);
+        drawIndicatorLineWithCurrentTime(canvas);
 
-                break;
-            case NONE:
-                canvas.save();
-                canvas.clipRect(0, 0,
-                        mWidthHourRuler + widthContentTimeTable,
-                        mHeightHeaderTimeTable + heightContentTimeTable,
-                        REPLACE);
-                //Content timetable
-                canvas.save();
-                drawRectVerticalBackgroundTimeTable(canvas, heightContentTimeTable);
-                drawLineHorizontalBackgroundTimeTableWithOpacity(canvas);
-                drawTimeRulerLeftTimeTable(canvas);
-                drawTitleHeaderTimetable(canvas);
-                drawIconBitmapOlockAtTopLeftTimeTable(canvas);
-                drawFesEventCard(canvas);
-                drawIndicatorLineWithCurrentTime(canvas);
-                break;
-        }
     }
 
     private void drawTimeRulerLeftTimeTable(Canvas canvas) {
@@ -569,6 +581,17 @@ public class TimeTableView extends View {
                 blackPaint);
     }
 
+    //TODO:13/12/2018 - apply new way
+    @Override
+    public void computeScroll() {
+        super.computeScroll();
+        if (mScroller.computeScrollOffset()) {
+            mCurrentOrigin.y = mScroller.getCurrY();
+            mCurrentOrigin.x = mScroller.getCurrX();
+            ViewCompat.postInvalidateOnAnimation(this);
+        }
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (!isScalling) {
@@ -716,42 +739,55 @@ public class TimeTableView extends View {
             int deltaY = (int) (distanceY);
 
             // Calculate the new origin after scroll.
+//            switch (mCurrentScrollDirection) {
+//                case HORIZONTAL:
+//
+//                    if (deltaX < 0) {
+//                        if (getScrollX() < 0) {
+//                            deltaX = 0;
+//                        }
+//                    } else if (deltaX > 0) {
+//                        final int rightEdge = getWidth() - getPaddingRight();
+//                        final int availableToScroll = getmWidthHourRuler() + getmNumColumns() * getmCellWidth() - getScrollX() - rightEdge;
+//                        if (availableToScroll > 0) {
+//                            deltaX = Math.min(availableToScroll, deltaX);
+//                        } else {
+//                            deltaX = 0;
+//                        }
+//                    }
+//                    doScroll(deltaX, 0);
+//                    ViewCompat.postInvalidateOnAnimation(TimeTableView.this);
+//                    break;
+//                case VERTICAL:
+//
+//                    if (deltaY < 0) {
+//                        if (getScrollY() < 0) {
+//                            deltaY = 0;
+//                        }
+//                    } else if (deltaY > 0) {
+//                        final int bottomEdge = getHeight() - getPaddingBottom();
+//                        final int availableToScroll = getmHeightHeaderTimeTable() + getmNumRows() * getmCellHeight() - getScrollY() - bottomEdge;
+//                        if (availableToScroll > 0) {
+//                            deltaY = Math.min(availableToScroll, deltaY);
+//                        } else {
+//                            deltaY = 0;
+//                        }
+//                    }
+//                    ViewCompat.postInvalidateOnAnimation(TimeTableView.this);
+//                    doScroll(0, deltaY);
+//                    break;
+//            }
+
+            //TODO: 13/12/2018
             switch (mCurrentScrollDirection) {
                 case HORIZONTAL:
-
-                    if (deltaX < 0) {
-                        if (getScrollX() < 0) {
-                            deltaX = 0;
-                        }
-                    } else if (deltaX > 0) {
-                        final int rightEdge = getWidth() - getPaddingRight();
-                        final int availableToScroll = getmWidthHourRuler() + getmNumColumns() * getmCellWidth() - getScrollX() - rightEdge;
-                        if (availableToScroll > 0) {
-                            deltaX = Math.min(availableToScroll, deltaX);
-                        } else {
-                            deltaX = 0;
-                        }
-                    }
-                    doScroll(deltaX, 0);
+                    float mXScrollingSpeed = 1f;
+                    mCurrentOrigin.x -= distanceX * mXScrollingSpeed;
                     ViewCompat.postInvalidateOnAnimation(TimeTableView.this);
                     break;
                 case VERTICAL:
-
-                    if (deltaY < 0) {
-                        if (getScrollY() < 0) {
-                            deltaY = 0;
-                        }
-                    } else if (deltaY > 0) {
-                        final int bottomEdge = getHeight() - getPaddingBottom();
-                        final int availableToScroll = getmHeightHeaderTimeTable() + getmNumRows() * getmCellHeight() - getScrollY() - bottomEdge;
-                        if (availableToScroll > 0) {
-                            deltaY = Math.min(availableToScroll, deltaY);
-                        } else {
-                            deltaY = 0;
-                        }
-                    }
+                    mCurrentOrigin.y -= distanceY;
                     ViewCompat.postInvalidateOnAnimation(TimeTableView.this);
-                    doScroll(0, deltaY);
                     break;
             }
             invalidate();
