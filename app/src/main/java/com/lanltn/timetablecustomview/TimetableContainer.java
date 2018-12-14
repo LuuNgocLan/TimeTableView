@@ -171,25 +171,14 @@ public class TimetableContainer extends View {
         mDefaultCornerRadius = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 3,
                 context.getResources().getDisplayMetrics());
-
-
-        mWidthEachEvent = ((width - mWidthHeader) / 6);
-
-        mWidthEventContainer = width;
         mEffectiveMinHourHeight = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 CELL_HEIGHT,
                 context.getResources().getDisplayMetrics());
-        if (6 > mMaximumStage) {
-            mEffectiveMinHourWidth = ((width - mWidthHeader) / mMaximumStage);   // chieu rong lon nhat cua event
-        } else {
-            mEffectiveMinHourWidth = ((width - mWidthHeader) / 6);
-        }
         mHeightEachEvent = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                 CELL_HEIGHT,
                 context.getResources().getDisplayMetrics());
-
-        mMaxHourWidth = mWidthEachEvent * 4;
         mMaxHourHeight = mHeightEachEvent * 4;
+
         initScroll(context);
         //text size
         mTextTimeRuler = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
@@ -302,18 +291,18 @@ public class TimetableContainer extends View {
     }
 
     private void setPaintLineStroke() {
-        mPaintLineStroke.setColor(getResources().getColor(R.color.colorTitle));
+        mPaintLineStroke.setColor(getResources().getColor(R.color.colorLabelHour));
         mPaintLineStroke.setStrokeWidth(4);
     }
 
     private void setPaintLineNoStoke() {
-        mPaintLineNoStroke.setColor(getResources().getColor(R.color.colorTitle));
+        mPaintLineNoStroke.setColor(getResources().getColor(R.color.colorLabelHour));
         mPaintLineNoStroke.setStrokeWidth(1);
     }
 
     private void setPaintLineLight() {
-        mPaintLineLight.setColor(getResources().getColor(android.R.color.white));
-        mPaintLineLight.setStrokeWidth(1);
+        mPaintLineLight.setColor(getResources().getColor(R.color.colorTitle));
+        mPaintLineLight.setStrokeWidth(1.5f);
     }
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
@@ -339,7 +328,9 @@ public class TimetableContainer extends View {
         super.onDraw(canvas);
         drawRowAndEventsContainer(canvas);
         drawTime(canvas);
-        drawCurrentTimeIndicator(canvas);
+        if (isToday) {
+            drawCurrentTimeIndicator(canvas);
+        }
         drawIconBitmapOlockAtTopLeftTimeTable(canvas);
         drawHeaderTimeTable(canvas);
     }
@@ -404,33 +395,39 @@ public class TimetableContainer extends View {
         for (int hourNumber = 0; hourNumber < MAXIMUM_HOUR_IN_DAY; hourNumber++) {
             //vi tri top hien tai
             float top = mCurrentOrigin.y + mHeightEachEvent * hourNumber + mMinMargin + mHeightHeader;
-            int dx = (int) (mCurrentOrigin.x + mWidthHeader);
-            if (top < getHeight()) {
-                //ve duong line chinh 0:00
-                canvas.drawLine(dx, (int) top, mWidthEventContainer, (int) top, mPaintLineLight);
-                //ve duong line phu 0:30
-                canvas.drawLine(dx, (int) top + mHeightEachEvent / 2, mWidthEventContainer,
-                        (int) top + mHeightEachEvent / 2, mPaintLineLight);
+            for (int col = 0; col < 6; col++) {
+                int dx = (int) (mCurrentOrigin.x + mWidthHeader + col * mWidthEachEvent);
+                if (top < getHeight()) {
+                    if (col % 2 == 0) {
+                        mPaintLineLight.setAlpha(100);
+                        canvas.drawLine(dx, (int) top, dx + mWidthEachEvent, (int) top, mPaintLineLight);
+                        mPaintLineLight.setAlpha(65);
+                        canvas.drawLine(dx, (int) top + mHeightEachEvent / 2, dx + mWidthEachEvent,
+                                (int) top + mHeightEachEvent / 2, mPaintLineLight);
+                    } else {
+                        mPaintLineLight.setAlpha(75);
+                        canvas.drawLine(dx, (int) top, dx + mWidthEachEvent, (int) top, mPaintLineLight);
+                        mPaintLineLight.setAlpha(55);
+                        canvas.drawLine(dx, (int) top + mHeightEachEvent / 2, dx + mWidthEachEvent,
+                                (int) top + mHeightEachEvent / 2, mPaintLineLight);
+                    }
+                }
             }
         }
 
-        //doan nay de xet hieu ung luc press xuong rect bang cach Overlay mau sac
+        //Set effect when press on event rect
         if (mIsPressDown) {
             if (mCountEventPress < 10) {
                 mCountEventPress++;
-                mPaintOverLay.setColor(getResources().getColor(R.color.bg_overlay_color));
+                mPaintOverLay.setColor(getResources().getColor(android.R.color.transparent));
                 canvas.drawRoundRect(mRectFPress, mDefaultCornerRadius, mDefaultCornerRadius, mPaintOverLay);
             }
 
         } else {
-            // neu k nhan thi ve event card tai vi tri da xac dinh
             mPaintOverLay.setColor(getResources().getColor(android.R.color.transparent));
             canvas.drawRoundRect(mRectFPress, mDefaultCornerRadius, mDefaultCornerRadius, mPaintOverLay);
         }
 
-        /**
-         * Draw card event
-         */
         drawFesEventCard(canvas);
 
     }
@@ -442,7 +439,6 @@ public class TimetableContainer extends View {
         int currentMinute = timeCurrent.get(Calendar.MINUTE);
 
         //TODO: format time from getting
-        //Create label hour
         String labelHour;
         if (currentMinute < 10) {
             labelHour = currentHourIn24Format + ":0" + currentMinute;
@@ -503,12 +499,11 @@ public class TimetableContainer extends View {
             } else {
                 canvas.drawRect(dx, 0, dx + mWidthEachEvent, mHeightHeader, paintOddBg);
             }
-            String value = getTextForStageBound(mTitleHeader[i], mWidthEachEvent);
+            String value = getTextForStageBound(mTitleHeader[i], textWidth);
             if (!TextUtils.isEmpty(value)) {
-                drawTextAndBreakLine(canvas, mPaintTitleText, dx + (mWidthEachEvent / 2),
-                        mHeightHeader / 2 - (bounds.height() / 4) + (mTextTitleStage / 2), mWidthEachEvent, value);
+                drawTextAndBreakLine(canvas, mPaintTitleText, dx + (textWidth / 2),
+                        mHeightHeader / 2 - (bounds.height() / 4) + (mTextTitleStage / 2), textWidth, value);
             }
-
         }
 //    }
     }
@@ -533,14 +528,12 @@ public class TimetableContainer extends View {
                     heightTimeTable,
                     mPaint);
         }
-
     }
 
     private void drawFesEventCard(Canvas canvas) {
         mEventRects.clear();
         Paint _mPaint;
         float timeFesStart, timeFesEnd;
-        String nameFes;
         float
                 left,
                 top,
@@ -549,8 +542,6 @@ public class TimetableContainer extends View {
 
         for (Event fesEvent : mListFesEvent) {
             if (fesEvent != null) {
-
-                nameFes = fesEvent.getmNameEvent();
 
                 left = mCurrentOrigin.x + mWidthHeader + fesEvent.getIdCol() * mWidthEachEvent;
                 timeFesStart = convertTimeStringToHour(fesEvent.getmStartEvent());
@@ -568,13 +559,20 @@ public class TimetableContainer extends View {
                 RectF rectF = new RectF(rect);
                 canvas.drawRoundRect(
                         rectF,
-                        10,
-                        10,
+                        mDefaultCornerRadius,
+                        mDefaultCornerRadius,
                         _mPaint);
 
                 //Draw name of fes event center rectangle
                 _mPaint = setStyleText(fesEvent.getIdType());
-                drawTextCenterOfRect(canvas, _mPaint, nameFes, left, top, width_rect, height_rect);
+                _mPaint.setTextAlign(Paint.Align.CENTER);
+//                drawTextCenterOfRect(canvas, _mPaint, nameFes, left, top, width_rect, height_rect);
+                float textWidth = mWidthEachEvent;
+                String value = getTextForStageBound(fesEvent.getmNameEvent(), textWidth);
+                if (!TextUtils.isEmpty(value)) {
+                    drawTextAndBreakLine(canvas, _mPaint, rect.left + (textWidth / 2),
+                            top + height_rect / 2 + (mTextTitleStage / 2), textWidth, value);
+                }
 
                 //Draw time begin and time end of fes event
                 _mPaint.setColor(Color.WHITE);
@@ -700,8 +698,8 @@ public class TimetableContainer extends View {
                     mPaintLineStroke.setColor(getResources().getColor(R.color.colorAccent));
                     mPaintLineNoStroke.setColor(getResources().getColor(R.color.colorAccent));
                 } else {
-                    mPaintLineNoStroke.setColor(getResources().getColor(R.color.colorTitle));
-                    mPaintLineStroke.setColor(getResources().getColor(R.color.colorTitle));
+                    mPaintLineNoStroke.setColor(getResources().getColor(R.color.colorLabelHour));
+                    mPaintLineStroke.setColor(getResources().getColor(R.color.colorLabelHour));
                 }
                 canvas.drawLine(mWidthHeader, (int) top, mWidthHeader - 30, (int) top, mPaintLineStroke);
                 canvas.drawLine(mWidthHeader, (int) top + mNormalDistance, mWidthHeader - mMinMargin,
@@ -739,7 +737,7 @@ public class TimetableContainer extends View {
      */
     private void drawTextTime(int top, Canvas canvas, int i) {
         Paint paintTextCounter = new Paint();
-        paintTextCounter.setColor(getResources().getColor(R.color.colorTitle));
+        paintTextCounter.setColor(getResources().getColor(R.color.colorLabelHour));
         paintTextCounter.setTextSize(mTextTimeRuler);
         paintTextCounter.setTextAlign(Paint.Align.CENTER);
         paintTextCounter.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
@@ -970,17 +968,6 @@ public class TimetableContainer extends View {
 //        }
     }
 
-    private int getMaxLineForBox(float height) {
-//        float heightBoxDP = AppUtils.pxToDip(height, mContext);
-//        if (heightBoxDP <= 30) {
-//            return 1;
-//        } else if (heightBoxDP <= 50) {
-//            return 2;
-//        }
-
-        return 100; // Assume maximum 100 artists
-    }
-
     private void checkFavoriteEvent(Event event) {
 
     }
@@ -1075,6 +1062,14 @@ public class TimetableContainer extends View {
         } while (nextPos < lengthBeforeBreak);
     }
 
+    /**
+     * @param canvas
+     * @param paint
+     * @param x
+     * @param y
+     * @param maxWidth
+     * @param text
+     */
     private void drawTextAndBreakLine(final Canvas canvas, final Paint paint,
                                       final float x, final float y, final float maxWidth, final String text) {
         String textToDisplay = text;
@@ -1225,7 +1220,19 @@ public class TimetableContainer extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        //calc size
+        calculateDimensions();
+    }
+
+    private void calculateDimensions() {
+        mWidthEachEvent = ((getWidth() - mWidthHeader) / 6);
+        mWidthEventContainer = getWidth();
+        if (6 > mMaximumStage) {
+            mEffectiveMinHourWidth = ((getWidth() - mWidthHeader) / mMaximumStage);   // chieu rong lon nhat cua event
+        } else {
+            mEffectiveMinHourWidth = ((getWidth() - mWidthHeader) / 6);
+        }
+
+        mMaxHourWidth = mWidthEachEvent * 4;
     }
 
     public void invalidated() {
