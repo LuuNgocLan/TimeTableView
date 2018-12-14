@@ -340,11 +340,10 @@ public class TimetableContainer extends View {
         mCanvas = canvas;
         drawIconBitmapOlockAtTopLeftTimeTable(canvas);
         drawHeaderRowAndEvents(canvas);
+        canvas.save();
         drawTime(canvas);
-        if (mIsToday) {
-           // drawCurrentTime(mCanvas);
-            drawIndicatorLineWithCurrentTime(canvas);
-        }
+        canvas.save();
+        drawIndicatorLineWithCurrentTime(canvas);
     }
 
     private void drawHeaderRowAndEvents(Canvas canvas) {
@@ -359,6 +358,7 @@ public class TimetableContainer extends View {
             mHeightEachEvent = mNewHeightEachEvent;
             mNewHeightEachEvent = -1;
         }
+
         if (mNewWidthEachEvent > 0) {
             if (mNewWidthEachEvent < mEffectiveMinHourWidth) {
                 mNewWidthEachEvent = mEffectiveMinHourWidth;
@@ -369,7 +369,6 @@ public class TimetableContainer extends View {
             mWidthEachEvent = mNewWidthEachEvent;
             mNewWidthEachEvent = -1;
         }
-
 
         mNormalDistance = mHeightEachEvent / TOTAL_DISTANCE_EACH_NORNAL_TIME_STONE;
 
@@ -392,6 +391,7 @@ public class TimetableContainer extends View {
 
         if (mCurrentOrigin.x < mWidthEventContainer - mWidthEachEvent * 6 - mWidthHeader)
             mCurrentOrigin.x = mWidthEventContainer - mWidthEachEvent * 6 - mWidthHeader;
+
         //scrolling horizontal
         if (mCurrentOrigin.x > 0) {
             mCurrentOrigin.x = 0;
@@ -404,19 +404,6 @@ public class TimetableContainer extends View {
 
         drawRectVerticalBackgroundTimeTable(canvas, getHeight());
 
-//        mEventRects.clear();
-//        for (int i = 0; i < 6; i++) {
-        //check cot co su kien
-//            if (mStages.get(i).getEvents() != null && mStages.get(i).getEvents().size() != 0) {
-//                //duyet tat ca cac su kien trong cot do
-//                for (int j = 0; j < mStages.get(i).getEvents().size(); j++) {
-//                    //add vao EventRect list su kien va khung dinh vi-default null
-//                    mEventRects.add(new EventRect(null, mStages.get(i).getEvents().get(j)));
-//                }
-//            }
-//        }
-
-        //duyet moc thoi gian tu 0->33
         for (int hourNumber = 0; hourNumber < MAXIMUM_HOUR_IN_DAY; hourNumber++) {
             //vi tri top hien tai
             float top = mCurrentOrigin.y + mHeightEachEvent * hourNumber + mMinMargin + mHeightHeader;
@@ -430,21 +417,6 @@ public class TimetableContainer extends View {
             }
         }
 
-
-        for (int hourNumber = 0; hourNumber < MAXIMUM_HOUR_IN_DAY; hourNumber++) {
-            float top = mCurrentOrigin.y + mHeightEachEvent * hourNumber + mMinMargin + mHeightHeader;
-            int dx = (int) (mCurrentOrigin.x + mWidthHeader);
-            if (top < getHeight()) {
-                drawEvent(canvas, top, hourNumber, dx);
-                if (mIsToday) {
-                    // check de ve duong chi thoi gian white
-                    if (currentHour == hourNumber) {
-                        float dy = top + ((currentMin * mNormalDistance) / 10);
-                        canvas.drawLine(mWidthHeader, dy, mWidthEventContainer, dy, mPaintCurrentTime);
-                    }
-                }
-            }
-        }
         //doan nay de xet hieu ung luc press xuong rect bang cach Overlay mau sac
         if (mIsPressDown) {
             if (mCountEventPress < 10) {
@@ -468,15 +440,16 @@ public class TimetableContainer extends View {
          * Draw First row title header TimeTable
          */
         drawHeaderTimeTable(canvas);
+
     }
 
     private void drawIndicatorLineWithCurrentTime(Canvas canvas) {
         float startX, startY;
-        //get current time
         Calendar timeCurrent = Calendar.getInstance();
         int currentHourIn24Format = timeCurrent.get(Calendar.HOUR_OF_DAY);
         int currentMinute = timeCurrent.get(Calendar.MINUTE);
 
+        //TODO: format time from getting
         //Create label hour
         String labelHour;
         if (currentMinute < 10) {
@@ -485,47 +458,36 @@ public class TimetableContainer extends View {
             labelHour = currentHourIn24Format + ":" + currentMinute;
         }
 
-        float time = currentHourIn24Format + currentMinute * 1.0f / 60; //EX: current time is 5 o'clock
+        float time = currentHourIn24Format + currentMinute * 1.0f / 60;
 
         Paint mPaintCurrentTimeWhite = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaintCurrentTimeWhite.setColor(getResources().getColor(R.color.colorHightLine));
         mPaintCurrentTimeWhite.setStrokeWidth(6);
-        startX = mWidthHeader - 80;
+        startX = mWidthHeader - 30;
         startY = mCurrentOrigin.y + mHeightHeader + time * mHeightEachEvent + mPaintCurrentTimeWhite.getStrokeWidth() / 2 + mMinMargin;
-        canvas.drawLine(
-                startX,
-                startY,
-                mWidthEachEvent * 6 + mWidthHeader,
-                startY,
-                mPaintCurrentTimeWhite);
 
-        float dy = startY;
+        float heightRectCurrentTime = mTextTimeRuler + mPaintCurrentTimeWhite.getStrokeWidth() / 2;
+        float dy = startY - 3;
         RectF rectF = new RectF();
-        rectF.top = dy - mNormalDistance;
-        rectF.bottom = dy + mNormalDistance;
+        rectF.top = dy - heightRectCurrentTime / 2;
+        rectF.bottom = dy + heightRectCurrentTime;
         rectF.left = mDefaultCornerRadius * 2;
         rectF.right = mWidthHeader - mDefaultCornerRadius * 2;
 
+        canvas.clipRect(0, rectF.top, getWidth(), rectF.bottom, Region.Op.REPLACE);
+
+        canvas.drawLine(startX, startY,
+                startX + mWidthEachEvent * 6 + mWidthHeader, startY,
+                mPaintCurrentTimeWhite);
         //Rect bound of label
-        mPaintCurrentTimeWhite.setStyle(Paint.Style.FILL);
-        mPaintCurrentTimeWhite.setTextSize(mTextTimeRuler);
-        mPaintCurrentTimeWhite.setStrokeWidth(1);
-        Rect bounds = new Rect();
-        mPaintCurrentTime.getTextBounds(labelHour, 0, labelHour.length(), bounds);
+        mPaintCurrentTimeWhite = setStyleRectEvent(RECT_WHITE);
         canvas.drawRoundRect(rectF, mDefaultCornerRadius, mDefaultCornerRadius, mPaintCurrentTimeWhite);
 
-//        int width_bound = (int) mPaintLineWhite.getTextSize() + 2;
-//        mPaintLineWhite = setStyleRectEvent(RECT_WHITE);
-//        startX = 10;
-//        startY = mCurrentOrigin.y + mHeightHeader + time * mHeightEachEvent - width_bound / 2 + mMinMargin;
-//        float bottom = width_bound + mCurrentOrigin.y + mHeightHeader + time * mHeightEachEvent + mMinMargin;
-//        canvas.drawRoundRect(startX, startY, 85, bottom, 5, 5, mPaintLineWhite);
+        mPaintCurrentTimeWhite.setColor(getResources().getColor(R.color.colorAccent));
+        mPaintCurrentTimeWhite.setStrokeWidth(1);
+        mPaintCurrentTimeWhite.setTextSize(mTextTimeRuler);
+        drawTextCenterOfRect(canvas, mPaintCurrentTimeWhite, labelHour, rectF.left, rectF.top, rectF.width(), rectF.height());
 
-//
-
-        canvas.drawText(labelHour,
-                rectF.width() / 2 + (bounds.width() / 2),
-                dy + mNormalDistance - (rectF.height() / 2) + (bounds.height()), mPaintCurrentTimeWhite);
     }
 
     private void drawHeaderTimeTable(Canvas canvas) {
@@ -584,7 +546,7 @@ public class TimetableContainer extends View {
 
     private void drawFesEventCard(Canvas canvas) {
         mEventRects.clear();
-        Paint _mPaint = new Paint();
+        Paint _mPaint;
         float timeFesStart, timeFesEnd;
         String nameFes;
         float
@@ -642,8 +604,8 @@ public class TimetableContainer extends View {
      * @param canvas
      * @param paint
      * @param text
-     * @param posX
-     * @param posY
+     * @param posX        posX of rectangle
+     * @param posY        posY of retangle
      * @param with_rect
      * @param height_rect
      */
@@ -672,7 +634,7 @@ public class TimetableContainer extends View {
                 _mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
                 _mPaint.setColor(getResources().getColor(R.color.colorAccent));
                 break;
-            case 3:
+            case RECT_WHITE:
                 _mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
                 _mPaint.setColor(Color.WHITE);
                 break;
@@ -888,6 +850,7 @@ public class TimetableContainer extends View {
         paintOclock.setStrokeWidth(2);
         paintOclock.setStyle(Paint.Style.STROKE);
         canvas.clipRect(0, 0, mWidthHeader, mHeightHeader, REPLACE);
+
         canvas.drawColor(Color.BLACK);
         Drawable drawable = getResources().getDrawable(R.drawable.ic_access_time);
         Bitmap bitmap = drawableToBitmap(drawable);
@@ -895,6 +858,7 @@ public class TimetableContainer extends View {
         int heightBitmap = bitmap.getHeight();
         canvas.drawBitmap(bitmap, (mWidthHeader - widthBitmap) / 2,
                 (mHeightHeader - heightBitmap) / 2, paintOclock);
+
     }
 
     /**
@@ -1305,6 +1269,7 @@ public class TimetableContainer extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
+        //calc size
     }
 
     public void invalidated() {
@@ -1316,16 +1281,6 @@ public class TimetableContainer extends View {
         currentHour = rightNow.get(Calendar.HOUR_OF_DAY) + mPlusHour;
         currentMin = rightNow.get(Calendar.MINUTE);
         invalidate();
-    }
-
-    private enum Direction {
-        NONE, HORIZONTAL, VERTICAL
-    }
-
-    public interface IOnTimeTableClickEvent {
-        void clickEventItem(Event event);
-
-        void updateCurrentTime();
     }
 
 //    public void updateOffset(String timeEvent, int artistId) {
@@ -1395,5 +1350,15 @@ public class TimetableContainer extends View {
 
     public enum TimetableContainerType {
         TIME_TABLE_ALL_STAGE, TIME_TABLE_MY_FES, TIME_TABLE_MM20
+    }
+
+    private enum Direction {
+        NONE, HORIZONTAL, VERTICAL
+    }
+
+    public interface IOnTimeTableClickEvent {
+        void clickEventItem(Event event);
+
+        void updateCurrentTime();
     }
 }
