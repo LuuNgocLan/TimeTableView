@@ -24,26 +24,6 @@ public class MainActivity extends AppCompatActivity implements TimetableContaine
         timetableContainer = findViewById(R.id.timeTableContainer);
         timetableContainer.setmEvents(mListFesEvent);
         timetableContainer.setmIOnClickEventItem(this);
-//        timeTableView = findViewById(R.id.pixelGridView);
-//
-//        timeTableView.setmNumColumns(6);
-//        timeTableView.setmNumRows(24);
-//        timeTableView.setmCellHeight(70);
-//        timeTableView.setmWidthHourRuler(110);
-//        timeTableView.setmHeightHeaderTimeTable(150);
-//        timeTableView.setmListFesEvent(mListFesEvent);
-//        int currentHourIn24Format = timeCurrent.get(Calendar.HOUR_OF_DAY);
-//        int currentMinute = timeCurrent.get(Calendar.MINUTE);
-//        //Create label hour
-//        String labelHour;
-//        if (currentMinute < 10) {
-//            labelHour = currentHourIn24Format + ":0" + currentMinute;
-//        } else {
-//            labelHour = currentHourIn24Format + ":" + currentMinute;
-//        }
-//
-//        timeTableView.setFocusViewToTime(labelHour);
-
     }
 
     private void initData() {
@@ -59,7 +39,9 @@ public class MainActivity extends AppCompatActivity implements TimetableContaine
         mListFesEvent.add(new Event("Micha", "13:00", "15:50", 3, 1));
         mListFesEvent.add(new Event("DEDE", "3:00", "3:50", 3, 2));
         mListFesEvent.add(new Event("Micha", "13:00", "15:50", 3, 1));
-        mListFesEvent.add(new Event("Upend", "1:00", "5:50", 1, 2));
+        mListFesEvent.add(new Event("Upend", "1:00", "2:50", 1, 2));
+        mListFesEvent.add(new Event("YOGE", "3:00", "4:50", 0, 1));
+        mListFesEvent.add(new Event("Upend", "5:00", "7:50", 1, 0));
         mListFesEvent.add(new Event("Micha", "21:30", "23:00", 3, 1));
     }
 
