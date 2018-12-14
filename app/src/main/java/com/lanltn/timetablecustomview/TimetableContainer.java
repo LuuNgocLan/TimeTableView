@@ -337,17 +337,14 @@ public class TimetableContainer extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        mCanvas = canvas;
-        drawIconBitmapOlockAtTopLeftTimeTable(canvas);
-        drawHeaderRowAndEvents(canvas);
-        canvas.save();
+        drawRowAndEventsContainer(canvas);
         drawTime(canvas);
-        canvas.save();
-        drawIndicatorLineWithCurrentTime(canvas);
+        drawCurrentTimeIndicator(canvas);
+        drawIconBitmapOlockAtTopLeftTimeTable(canvas);
+        drawHeaderTimeTable(canvas);
     }
 
-    private void drawHeaderRowAndEvents(Canvas canvas) {
-
+    private void drawRowAndEventsContainer(Canvas canvas) {
         // Calculate size each event
         if (mNewHeightEachEvent > 0) {
             if (mNewHeightEachEvent < mEffectiveMinHourHeight) {
@@ -436,14 +433,9 @@ public class TimetableContainer extends View {
          */
         drawFesEventCard(canvas);
 
-        /**
-         * Draw First row title header TimeTable
-         */
-        drawHeaderTimeTable(canvas);
-
     }
 
-    private void drawIndicatorLineWithCurrentTime(Canvas canvas) {
+    private void drawCurrentTimeIndicator(Canvas canvas) {
         float startX, startY;
         Calendar timeCurrent = Calendar.getInstance();
         int currentHourIn24Format = timeCurrent.get(Calendar.HOUR_OF_DAY);
@@ -688,42 +680,6 @@ public class TimetableContainer extends View {
         }
 
         return nameOutput;
-    }
-
-    private void drawCurrentTime(Canvas canvas) {
-        Paint paint = new Paint();
-        paint.setColor(getResources().getColor(R.color.colorHightLine));
-        paint.setTextSize(mTextTimeRuler);
-        paint.setTextAlign(Paint.Align.CENTER);
-        paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
-
-        for (int i = 0; i < MAXIMUM_HOUR_IN_DAY; i++) {
-            float top = mCurrentOrigin.y + mHeightEachEvent * i + mMinMargin + mHeightHeader;
-            if (top < (getHeight())) {
-                if (currentHour == i) {
-                    int hourConverted = currentHour;
-                    if (currentHour >= PLUS_HOUR_FOR_DAY) {
-                        hourConverted -= PLUS_HOUR_FOR_DAY;
-                    }
-                    float dy = top + ((currentMin * mNormalDistance) / 10);
-                    RectF rectF = new RectF();
-                    rectF.top = dy - mNormalDistance;
-                    rectF.bottom = dy + mNormalDistance;
-                    rectF.left = mDefaultCornerRadius * 2;
-                    rectF.right = mWidthHeader - mDefaultCornerRadius * 2;
-                    //get width of text
-                    Rect bounds = new Rect();
-                    String value = String.format(Locale.getDefault(), "%02d:%02d", hourConverted, currentMin);
-                    mPaintCurrentTime.getTextBounds(value, 0, value.length(), bounds);
-
-                    canvas.drawRoundRect(rectF, mDefaultCornerRadius, mDefaultCornerRadius, mPaintCurrentTime);
-                    canvas.drawText(value,
-                            rectF.width() / 2 + (bounds.width() / 2),
-                            dy + mNormalDistance - (rectF.height() / 2) + (bounds.height()), paint);
-                    canvas.drawLine(rectF.right, dy, mWidthHeader, dy, mPaintCurrentTime);
-                }
-            }
-        }
     }
 
     /**
