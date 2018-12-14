@@ -3,7 +3,6 @@ package com.lanltn.timetablecustomview;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -35,7 +34,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
-import static android.graphics.Region.Op.INTERSECT;
 import static android.graphics.Region.Op.REPLACE;
 
 public class TimetableContainer extends View {
@@ -344,7 +342,7 @@ public class TimetableContainer extends View {
         drawHeaderRowAndEvents(canvas);
         drawTime(canvas);
         if (mIsToday) {
-//            drawCurrentTime(mCanvas);
+           // drawCurrentTime(mCanvas);
             drawIndicatorLineWithCurrentTime(canvas);
         }
     }
@@ -489,39 +487,45 @@ public class TimetableContainer extends View {
 
         float time = currentHourIn24Format + currentMinute * 1.0f / 60; //EX: current time is 5 o'clock
 
-        Paint mPaintLineWhite = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mPaintLineWhite.setColor(getResources().getColor(R.color.colorHighLine));
-        mPaintLineWhite.setStrokeWidth(6);
+        Paint mPaintCurrentTimeWhite = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mPaintCurrentTimeWhite.setColor(getResources().getColor(R.color.colorHightLine));
+        mPaintCurrentTimeWhite.setStrokeWidth(6);
         startX = mWidthHeader - 80;
-        startY = mCurrentOrigin.y + mHeightHeader + time * mHeightEachEvent + mPaintLineWhite.getStrokeWidth() / 2 + mMinMargin;
+        startY = mCurrentOrigin.y + mHeightHeader + time * mHeightEachEvent + mPaintCurrentTimeWhite.getStrokeWidth() / 2 + mMinMargin;
         canvas.drawLine(
                 startX,
                 startY,
                 mWidthEachEvent * 6 + mWidthHeader,
                 startY,
-                mPaintLineWhite);
+                mPaintCurrentTimeWhite);
+
+        float dy = startY;
+        RectF rectF = new RectF();
+        rectF.top = dy - mNormalDistance;
+        rectF.bottom = dy + mNormalDistance;
+        rectF.left = mDefaultCornerRadius * 2;
+        rectF.right = mWidthHeader - mDefaultCornerRadius * 2;
 
         //Rect bound of label
-        mPaintLineWhite.setStyle(Paint.Style.FILL);
-        mPaintLineWhite.setTextSize(mTextTimeRuler);
-        mPaintLineWhite.setStrokeWidth(1);
+        mPaintCurrentTimeWhite.setStyle(Paint.Style.FILL);
+        mPaintCurrentTimeWhite.setTextSize(mTextTimeRuler);
+        mPaintCurrentTimeWhite.setStrokeWidth(1);
+        Rect bounds = new Rect();
+        mPaintCurrentTime.getTextBounds(labelHour, 0, labelHour.length(), bounds);
+        canvas.drawRoundRect(rectF, mDefaultCornerRadius, mDefaultCornerRadius, mPaintCurrentTimeWhite);
 
-        int width_bound = (int) mPaintLineWhite.getTextSize() + 2;
-        mPaintLineWhite = setStyleRectEvent(RECT_WHITE);
-        startX = 10;
-        startY = mCurrentOrigin.y + mHeightHeader + time * mHeightEachEvent - width_bound / 2 + mMinMargin;
-        float bottom = width_bound + mCurrentOrigin.y + mHeightHeader + time * mHeightEachEvent + mMinMargin;
-        canvas.drawRoundRect(startX, startY, 85, bottom, 5, 5, mPaintLineWhite);
+//        int width_bound = (int) mPaintLineWhite.getTextSize() + 2;
+//        mPaintLineWhite = setStyleRectEvent(RECT_WHITE);
+//        startX = 10;
+//        startY = mCurrentOrigin.y + mHeightHeader + time * mHeightEachEvent - width_bound / 2 + mMinMargin;
+//        float bottom = width_bound + mCurrentOrigin.y + mHeightHeader + time * mHeightEachEvent + mMinMargin;
+//        canvas.drawRoundRect(startX, startY, 85, bottom, 5, 5, mPaintLineWhite);
 
-        mPaintLineWhite.setTextSize(mTextTimeRuler);
-        mPaintLineWhite.setStrokeWidth(1);
-        mPaintLineWhite.setColor(getResources().getColor(R.color.colorAccent));
-        float dy = mCurrentOrigin.y + mHeightHeader + time * mHeightEachEvent + mPaintLineWhite.getTextSize() / 2 + mMinMargin;
-        canvas.drawText(
-                labelHour,
-                20,
-                dy,
-                mPaintLineWhite);
+//
+
+        canvas.drawText(labelHour,
+                rectF.width() / 2 + (bounds.width() / 2),
+                dy + mNormalDistance - (rectF.height() / 2) + (bounds.height()), mPaintCurrentTimeWhite);
     }
 
     private void drawHeaderTimeTable(Canvas canvas) {
@@ -726,7 +730,7 @@ public class TimetableContainer extends View {
 
     private void drawCurrentTime(Canvas canvas) {
         Paint paint = new Paint();
-        paint.setColor(getResources().getColor(R.color.colorHighLine));
+        paint.setColor(getResources().getColor(R.color.colorHightLine));
         paint.setTextSize(mTextTimeRuler);
         paint.setTextAlign(Paint.Align.CENTER);
         paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
@@ -761,7 +765,7 @@ public class TimetableContainer extends View {
     }
 
     /**
-     * Draw Left header Time stone
+     * Draw Left Header Time Stone
      *
      * @param canvas
      */

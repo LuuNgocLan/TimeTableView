@@ -8,7 +8,6 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Region;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -30,7 +29,6 @@ import java.util.List;
 import java.util.Random;
 
 import static android.graphics.Region.Op.INTERSECT;
-import static android.graphics.Region.Op.REPLACE;
 
 public class TimeTableView extends View {
 
@@ -547,7 +545,7 @@ private void drawFesEventCard(Canvas canvas) {
 
         float time = currentHourIn24Format + currentMinute * 1.0f / 60; //EX: current time is 5 o'clock
 
-        blackPaint.setColor(getResources().getColor(R.color.colorHighLine));
+        blackPaint.setColor(getResources().getColor(R.color.colorHightLine));
         blackPaint.setStrokeWidth(6);
         canvas.drawLine(
                 getmWidthHourRuler() - 80,
