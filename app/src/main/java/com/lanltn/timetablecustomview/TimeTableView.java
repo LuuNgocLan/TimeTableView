@@ -375,7 +375,8 @@ private void drawFesEventCard(Canvas canvas) {
     for (Event fesEvent : mListFesEvent) {
         if (fesEvent != null) {
             nameFes = fesEvent.getmNameEvent();
-            left = getmWidthHourRuler() + fesEvent.getIdCol() * getmCellWidth();
+//            left = getmWidthHourRuler() + fesEvent.getIdCol() * getmCellWidth();
+            left=0;
             timeFesStart = convertTimeStringToHour(fesEvent.getmStartEvent());
             timeFesEnd = convertTimeStringToHour(fesEvent.getmEndEvent());
             top = mPaddingBottomHeader + getmHeightHeaderTimeTable() + timeFesStart * getmCellHeight();
