@@ -12,8 +12,6 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements TimetableContainer.IOnTimeTableClickEvent {
 
-    private TimeTableView timeTableView;
-    private List<Event> mListFesEvent = new ArrayList<>();
     private List<Stage> mStageList = new ArrayList<>();
     private Calendar timeCurrent = Calendar.getInstance();
     private TimetableContainer timetableContainer;
@@ -30,55 +28,60 @@ public class MainActivity extends AppCompatActivity implements TimetableContaine
     }
 
     private void initData() {
-        for(int i = 0; i<6; i++){
-
-        }
         List<Event> mListEvent = new ArrayList<>();
         mListEvent.add(new Event("DEDE", "00:00", "01:00", 0));
         mListEvent.add(new Event("TRAIN", "01:00", "02:00", 0));
-        mListEvent.add(new Event("OGREYOU", "02:00", "03:00", 0));
+        mListEvent.add(new Event("OGREYOU", "02:00", "03:00", 1));
         mListEvent.add(new Event("DOCT", "5:00", "6:00", 0));
         mListEvent.add(new Event("Upend", "10:20", "11:00", 0));
-        mStageList.add(new Stage("RED MARIQUE",mListEvent));
+        mStageList.add(new Stage("RED MARIQUE RED MARIQUE RED MARIQUE RED MARIQUE RED MARIQUE ", mListEvent));
 
-        List<Event> mListEvent_1 = new ArrayList<>();
-        mListEvent_1.add(new Event("GALLANT", "10:20", "11:00", 1));
-        mListEvent_1.add(new Event("SOCCER", "19:30", "21:00", 0));
-        mListEvent_1.add(new Event("THE BACK", "00:00", "02:00", 1));
-        mListEvent_1.add(new Event("CATFISH", "8:00", "9:30", 1));
-        mStageList.add(new Stage("GREEN STAGE",mListEvent_1));
+//        mListEvent = new ArrayList<>();
+//        mListEvent.add(new Event("GALLANT", "10:20", "11:00", 0));
+//        mListEvent.add(new Event("SOCCER", "19:30", "21:00", 0));
+//        mListEvent.add(new Event("THE BACK", "00:00", "02:00", 1));
+//        mListEvent.add(new Event("CATFISH", "8:00", "9:30", 1));
+//        mStageList.add(new Stage("GREEN STAGE",mListEvent));
 
-        mListFesEvent.add(new Event("YOGE", "12:00", "13:00", 0));
-        mListFesEvent.add(new Event("EDEN", "13:00", "15:50", 2));
-        mListFesEvent.add(new Event("FATHER", "16:00", "17:10", 1));
-        mListFesEvent.add(new Event("Rei", "18:00", "19:00", 0));
-        mListFesEvent.add(new Event("DEDE", "3:00", "3:50", 1));
-        mStageList.add(new Stage("GYPSY AVALON", mListFesEvent));
-//
-//        mListFesEvent.clear();
-//        mListFesEvent.add(new Event("Micha", "16:00", "16:50", 2));
-//        mListFesEvent.add(new Event("Upend bonjour", "1:00", "2:50", 1));
+//        mListEvent = new ArrayList<>();
+//        mListEvent.add(new Event("YOGE", "12:00", "13:00", 0));
+//        mListEvent.add(new Event("EDEN", "13:00", "15:50", 0));
+//        mListEvent.add(new Event("FATHER", "16:00", "17:10", 1));
+//        mListEvent.add(new Event("Rei", "18:00", "19:00", 0));
+//        mListEvent.add(new Event("DEDE", "3:00", "3:50", 1));
+//        mStageList.add(new Stage("GYPSY AVALON", mListEvent));
 
-//        mListFesEvent.add(new Event("DATS", "3:00", "4:50", 0));
-//        mListFesEvent.add(new Event("the HIATU", "5:00", "7:50", 1));
-//        mListFesEvent.add(new Event("Numb", "21:30", "23:00", 0));
-//        mStageList.add(new Stage("FIELD OF HEAVEN",mListFesEvent));
-//
-//        mListFesEvent.clear();
-//        mListFesEvent.add(new Event("Micha", "16:00", "16:50", 2));
-//        mListFesEvent.add(new Event("Upend bonjour", "1:00", "2:50", 1));
-//        mListFesEvent.add(new Event("DATS", "3:00", "4:50", 0));
-//        mListFesEvent.add(new Event("the HIATU", "5:00", "7:50", 1));
-//        mListFesEvent.add(new Event("Numb", "21:30", "23:00", 2));
-//        mStageList.add(new Stage("FIELD OF HEAVEN",mListFesEvent));
-//
-//        mListFesEvent.clear();
-//        mListFesEvent.add(new Event("Micha", "16:00", "16:50", 2));
-//        mListFesEvent.add(new Event("Upend bonjour", "1:00", "2:50", 1));
-//        mListFesEvent.add(new Event("DATS", "3:00", "4:50", 0));
-//        mListFesEvent.add(new Event("the HIATU", "5:00", "7:50", 1));
-//        mListFesEvent.add(new Event("Numb", "21:30", "23:00", 0));
-//        mStageList.add(new Stage("FIELD OF HEAVEN", mListFesEvent));
+        mListEvent = new ArrayList<>();
+        mListEvent.add(new Event("Micha", "16:00", "16:50", 0));
+        mListEvent.add(new Event("Upend bonjour", "1:00", "2:50", 1));
+        mListEvent.add(new Event("DATS", "3:00", "4:50", 0));
+        mListEvent.add(new Event("the HIATU", "5:00", "7:50", 1));
+        mListEvent.add(new Event("Numb", "21:30", "23:00", 0));
+        mStageList.add(new Stage("FIELD OF HEAVEN", mListEvent));
+
+        mListEvent = new ArrayList<>();
+        mListEvent.add(new Event("GALLANT", "00:00", "01:00", 0));
+        mListEvent.add(new Event("SOCCER", "03:30", "04:00", 1));
+        mListEvent.add(new Event("THE BACK", "05:00", "06:00", 2));
+        mListEvent.add(new Event("CATFISH", "8:00", "9:30", 0));
+        mStageList.add(new Stage("WHITE STAGE", mListEvent));
+
+        mListEvent = new ArrayList<>();
+        mListEvent.add(new Event("SAKi&", "12:00", "13:00", 0));
+        mListEvent.add(new Event("MART", "13:00", "15:50", 0));
+        mListEvent.add(new Event("RAG'N BONE", "16:00", "17:10", 0));
+        mListEvent.add(new Event("The XX", "18:00", "19:00", 0));
+        mListEvent.add(new Event("ROUT E 17", "3:00", "3:50", 2));
+        mStageList.add(new Stage("ORANGE COFFE", mListEvent));
+
+        mListEvent = new ArrayList<>();
+        mListEvent.add(new Event("Kirim", "16:00", "16:50", 2));
+        mListEvent.add(new Event("Upend bonjour", "1:00", "2:50", 0));
+        mListEvent.add(new Event("DATS", "3:00", "4:50", 0));
+        mListEvent.add(new Event("the HIATU", "5:00", "7:50", 0));
+        mListEvent.add(new Event("Numb", "21:30", "23:00", 0));
+        mStageList.add(new Stage("FIELD OF HEAVEN", mListEvent));
+
     }
 
     @Override
