@@ -42,6 +42,7 @@ public class TimetableContainer extends View {
     private static final int MAXIMUM_STAGE_MT10 = 6;
     private static final int MAXIMUM_STAGE_MT20 = 20;
     private static final int RECT_WHITE = 3;
+    private static final int STROKE_WIDTH = 1;
 
     public static int MAXIMUM_HOUR_IN_DAY = 33;
 
@@ -65,7 +66,7 @@ public class TimetableContainer extends View {
     private List<Event> mListFesEvent = new ArrayList<>();
     private List<EventRectF> mEventRects = new ArrayList<>();
     private String[] mTitleHeader = {
-            "RED MARQUEE",
+            "RED MARQUEE GREEN STAGE WHITE STAGE",
             "GREEN STAGE",
             "WHITE STAGE",
             "GYPSY AVALON",
@@ -237,7 +238,7 @@ public class TimetableContainer extends View {
 
     private void setPaintOverLay() {
         mPaintOverLay.setStyle(Paint.Style.FILL);
-        mPaintOverLay.setColor(getResources().getColor(R.color.bg_overlay_color));
+        mPaintOverLay.setColor(getResources().getColor(android.R.color.transparent));
     }
 
     private void setPaintCurrentTime() {
@@ -336,7 +337,7 @@ public class TimetableContainer extends View {
     }
 
     private void drawRowAndEventsContainer(Canvas canvas) {
-        // Calculate size each event
+        // Re-Calculate size each event
         if (mNewHeightEachEvent > 0) {
             if (mNewHeightEachEvent < mEffectiveMinHourHeight) {
                 mNewHeightEachEvent = mEffectiveMinHourHeight;
@@ -386,7 +387,7 @@ public class TimetableContainer extends View {
         }
         //////////////////////////////////////////////////////////
         /**
-         * Rect contain content TimeTable
+         * The Rect contain the TimeTable Content
          */
         canvas.clipRect(mWidthHeader, mHeightHeader, mWidthEventContainer, getHeight(), Region.Op.REPLACE);
 
@@ -501,7 +502,7 @@ public class TimetableContainer extends View {
             }
             String value = getTextForStageBound(mTitleHeader[i], textWidth);
             if (!TextUtils.isEmpty(value)) {
-                drawTextAndBreakLine(canvas, mPaintTitleText, dx + (textWidth / 2),
+                drawTextAndBreakLineFitInRect(canvas, mPaintTitleText, dx + (textWidth / 2),
                         mHeightHeader / 2 - (bounds.height() / 4) + (mTextTitleStage / 2), textWidth, value);
             }
         }
@@ -543,10 +544,10 @@ public class TimetableContainer extends View {
         for (Event fesEvent : mListFesEvent) {
             if (fesEvent != null) {
 
-                left = mCurrentOrigin.x + mWidthHeader + fesEvent.getIdCol() * mWidthEachEvent;
+                left = mCurrentOrigin.x + mWidthHeader + fesEvent.getIdCol() * mWidthEachEvent + STROKE_WIDTH;
                 timeFesStart = convertTimeStringToHour(fesEvent.getmStartEvent());
                 timeFesEnd = convertTimeStringToHour(fesEvent.getmEndEvent());
-                top = mCurrentOrigin.y + mHeightHeader + timeFesStart * mHeightEachEvent + mMinMargin;
+                top = mCurrentOrigin.y + mHeightHeader + timeFesStart * mHeightEachEvent + mMinMargin + STROKE_WIDTH;
                 height_rect = (timeFesEnd - timeFesStart) * mHeightEachEvent;
                 width_rect = mWidthEachEvent;
 
@@ -555,7 +556,7 @@ public class TimetableContainer extends View {
                  */
                 _mPaint = setStyleRectEvent(fesEvent.getIdType());
 
-                Rect rect = new Rect((int) left, (int) top, (int) (left + width_rect), (int) (top + height_rect));
+                Rect rect = new Rect((int) left, (int) top, (int) (left + width_rect - STROKE_WIDTH * 2), (int) (top + height_rect - STROKE_WIDTH * 2));
                 RectF rectF = new RectF(rect);
                 canvas.drawRoundRect(
                         rectF,
@@ -566,22 +567,21 @@ public class TimetableContainer extends View {
                 //Draw name of fes event center rectangle
                 _mPaint = setStyleText(fesEvent.getIdType());
                 _mPaint.setTextAlign(Paint.Align.CENTER);
-//                drawTextCenterOfRect(canvas, _mPaint, nameFes, left, top, width_rect, height_rect);
-                float textWidth = mWidthEachEvent;
+                float textWidth = mWidthEachEvent - 10;
                 String value = getTextForStageBound(fesEvent.getmNameEvent(), textWidth);
                 if (!TextUtils.isEmpty(value)) {
-                    drawTextAndBreakLine(canvas, _mPaint, rect.left + (textWidth / 2),
+                    drawTextAndBreakLineFitInRect(canvas, _mPaint, rect.left + (textWidth / 2),
                             top + height_rect / 2 + (mTextTitleStage / 2), textWidth, value);
                 }
 
                 //Draw time begin and time end of fes event
                 _mPaint.setColor(Color.WHITE);
+                _mPaint.setTextAlign(Paint.Align.LEFT);
                 _mPaint.setStrokeWidth(1);
-                _mPaint.setTextSize(10);
-                canvas.drawText(fesEvent.getmStartEvent(), left + 10, top + 15, _mPaint);
+                _mPaint.setTextSize(mTextTimeEvent);
+                canvas.drawText(fesEvent.getmStartEvent(), left + 10, top + 20, _mPaint);
                 canvas.drawText(fesEvent.getmEndEvent(), left + 10, top + height_rect - 10, _mPaint);
 
-                //add rect fes to the list mFesEventOfRectF
                 mEventRects.add(new EventRectF(rectF, fesEvent));
             }
         }
@@ -741,45 +741,9 @@ public class TimetableContainer extends View {
         paintTextCounter.setTextSize(mTextTimeRuler);
         paintTextCounter.setTextAlign(Paint.Align.CENTER);
         paintTextCounter.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
-        switch (i) {
-            case 24:
-                i = 0;
-                paintTextCounter.setColor(getResources().getColor(R.color.colorAccent));
-                break;
-            case 25:
-                i = 1;
-                paintTextCounter.setColor(getResources().getColor(R.color.colorAccent));
-                break;
-            case 26:
-                i = 2;
-                paintTextCounter.setColor(getResources().getColor(R.color.colorAccent));
-                break;
-            case 27:
-                i = 3;
-                paintTextCounter.setColor(getResources().getColor(R.color.colorAccent));
-                break;
-            case 28:
-                i = 4;
-                paintTextCounter.setColor(getResources().getColor(R.color.colorAccent));
-                break;
-            case 29:
-                i = 5;
-                paintTextCounter.setColor(getResources().getColor(R.color.colorAccent));
-                break;
-            case 30:
-                i = 6;
-                paintTextCounter.setColor(getResources().getColor(R.color.colorAccent));
-                break;
-            case 31:
-                i = 7;
-                paintTextCounter.setColor(getResources().getColor(R.color.colorAccent));
-                break;
-            case 32:
-                i = 8;
-                paintTextCounter.setColor(getResources().getColor(R.color.colorAccent));
-                break;
-            default:
-                break;
+        if (i > 23) {
+            paintTextCounter.setColor(getResources().getColor(R.color.colorAccent));
+            i = i % 24;
         }
         Rect bounds = new Rect();
         String value = checkTime(i);
@@ -972,9 +936,9 @@ public class TimetableContainer extends View {
 
     }
 
-    private void drawTextAndBreakLine(final Canvas canvas, final Paint paint,
-                                      final float x, final float y, final float maxWidth,
-                                      final String text, float maxHeight, float minHeight) {
+    private void drawTextAndBreakLineFitInRect(final Canvas canvas, final Paint paint,
+                                               final float x, final float y, final float maxWidth,
+                                               final String text, float maxHeight, float minHeight) {
         String textToDisplay = text;
         String tempText;
         char[] chars;
@@ -1033,9 +997,9 @@ public class TimetableContainer extends View {
         } while (nextPos < lengthBeforeBreak);
     }
 
-    private void drawTextAndBreakLine(final Canvas canvas, final Paint paint,
-                                      final float x, final float y, final float maxWidth,
-                                      final String text, float maxHeight) {
+    private void drawTextAndBreakLineFitInRect(final Canvas canvas, final Paint paint,
+                                               final float x, final float y, final float maxWidth,
+                                               final String text, float maxHeight) {
         String textToDisplay = text;
         String tempText;
         char[] chars;
@@ -1065,13 +1029,13 @@ public class TimetableContainer extends View {
     /**
      * @param canvas
      * @param paint
-     * @param x
-     * @param y
+     * @param x        rectF.left of the rectangle contain Text data
+     * @param y        rectF.top of the rectangle contain Text data
      * @param maxWidth
      * @param text
      */
-    private void drawTextAndBreakLine(final Canvas canvas, final Paint paint,
-                                      final float x, final float y, final float maxWidth, final String text) {
+    private void drawTextAndBreakLineFitInRect(final Canvas canvas, final Paint paint,
+                                               final float x, final float y, final float maxWidth, final String text) {
         String textToDisplay = text;
         String tempText;
         char[] chars;
@@ -1135,7 +1099,10 @@ public class TimetableContainer extends View {
 
         @Override
         public boolean onDoubleTapEvent(MotionEvent e) {
-            return super.onDoubleTapEvent(e);
+            //focus to head of container
+            mCurrentOrigin.x = 0;
+            mCurrentOrigin.y = 0;
+            return true;
         }
     };
 

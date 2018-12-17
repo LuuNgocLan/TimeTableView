@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements TimetableContaine
         mListFesEvent.add(new Event("CATFISH", "8:00", "9:30", 1, 2));
 
         mListFesEvent.add(new Event("YOGE", "12:00", "13:50", 4, 0));
-        mListFesEvent.add(new Event("EDEN", "13:00", "15:50", 3, 1));
+        mListFesEvent.add(new Event("EDEN YOGE YOGE YOGE YOGE  YOGE YOGEYOGEYOGEYOGE YOGE YOGE", "13:00", "15:50", 3, 1));
         mListFesEvent.add(new Event("FATHER", "15:00", "17:10", 5, 1));
         mListFesEvent.add(new Event("Rei", "13:00", "14:00", 0, 0));
         mListFesEvent.add(new Event("DEDE", "3:00", "3:50", 3, 2));
