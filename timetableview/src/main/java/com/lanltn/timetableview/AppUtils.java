@@ -1,4 +1,4 @@
-package com.lanltn.timetablecustomview;
+package com.lanltn.timetableview;
 
 import android.content.Context;
 import android.util.DisplayMetrics;

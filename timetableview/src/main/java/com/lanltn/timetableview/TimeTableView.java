@@ -1,4 +1,4 @@
-package com.lanltn.timetablecustomview;
+package com.lanltn.timetableview;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
