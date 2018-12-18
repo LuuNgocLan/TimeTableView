@@ -3,18 +3,21 @@ package com.lanltn.timetablecustomview;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Toast;
+
+import com.lanltn.timetableview.Event;
+import com.lanltn.timetableview.Stage;
+import com.lanltn.timetableview.TimeTableView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements TimetableContainer.IOnTimeTableClickEvent {
+public class MainActivity extends AppCompatActivity implements TimeTableView.IOnTimeTableClickEvent {
 
     private List<Stage> mStageList = new ArrayList<>();
     private Calendar timeCurrent = Calendar.getInstance();
-    private TimetableContainer timetableContainer;
+    private TimeTableView timetableContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,21 +39,6 @@ public class MainActivity extends AppCompatActivity implements TimetableContaine
         mListEvent.add(new Event("Upend", "10:20", "11:00", 0));
         mStageList.add(new Stage("RED MARIQUE RED MARIQUE RED MARIQUE RED MARIQUE RED MARIQUE ", mListEvent));
 
-//        mListEvent = new ArrayList<>();
-//        mListEvent.add(new Event("GALLANT", "10:20", "11:00", 0));
-//        mListEvent.add(new Event("SOCCER", "19:30", "21:00", 0));
-//        mListEvent.add(new Event("THE BACK", "00:00", "02:00", 1));
-//        mListEvent.add(new Event("CATFISH", "8:00", "9:30", 1));
-//        mStageList.add(new Stage("GREEN STAGE",mListEvent));
-
-//        mListEvent = new ArrayList<>();
-//        mListEvent.add(new Event("YOGE", "12:00", "13:00", 0));
-//        mListEvent.add(new Event("EDEN", "13:00", "15:50", 0));
-//        mListEvent.add(new Event("FATHER", "16:00", "17:10", 1));
-//        mListEvent.add(new Event("Rei", "18:00", "19:00", 0));
-//        mListEvent.add(new Event("DEDE", "3:00", "3:50", 1));
-//        mStageList.add(new Stage("GYPSY AVALON", mListEvent));
-
         mListEvent = new ArrayList<>();
         mListEvent.add(new Event("Micha", "16:00", "16:50", 0));
         mListEvent.add(new Event("Upend bonjour", "1:00", "2:50", 1));
@@ -60,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements TimetableContaine
         mStageList.add(new Stage("FIELD OF HEAVEN", mListEvent));
 
         mListEvent = new ArrayList<>();
-        mListEvent.add(new Event("GALLANT", "00:00", "01:00", 0));
+        mListEvent.add(new Event("GALLANT bvbxvcsbhc ", "00:00", "01:00", 0));
         mListEvent.add(new Event("SOCCER", "03:30", "04:00", 1));
         mListEvent.add(new Event("THE BACK", "05:00", "06:00", 2));
         mListEvent.add(new Event("CATFISH", "8:00", "9:30", 0));

@@ -1,4 +1,4 @@
-package com.lanltn.timetablecustomview;
+package com.lanltn.timetableview;
 
 import java.util.List;
 
