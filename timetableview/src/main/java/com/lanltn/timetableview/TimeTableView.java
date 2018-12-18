@@ -26,23 +26,24 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.OverScroller;
 import android.widget.Scroller;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 
 import static android.graphics.Region.Op.REPLACE;
 
-public class TimetableContainer extends View {
+public class TimeTableView extends View {
 
     public static final int PLUS_HOUR_FOR_DAY = 24;
     private static final int MAXINUM_STAGE = 4;
     private static final int MAXIMUM_STAGE_MT10 = 6;
     private static final int MAXIMUM_STAGE_MT20 = 20;
     private static final int RECT_WHITE = 3;
+    private static final int EVENT_NORMAL = 0;
+    private static final int EVENT_WATCH = 1;
+    private static final int EVENT_FAVORITE = 2;
     private static final int STROKE_WIDTH = 1;
 
     public static int MAXIMUM_HOUR_IN_DAY = 33;
@@ -111,9 +112,9 @@ public class TimetableContainer extends View {
     //over lay
     private Paint mPaintOverLay = new Paint(Paint.ANTI_ALIAS_FLAG);
 
-    Calendar rightNow = Calendar.getInstance(Locale.JAPAN);
-    int currentHour = rightNow.get(Calendar.HOUR_OF_DAY);
-    int currentMin = rightNow.get(Calendar.MINUTE);
+    Calendar calendarDefault = Calendar.getInstance(Locale.JAPAN);
+    int currentHour = calendarDefault.get(Calendar.HOUR_OF_DAY);
+    int currentMin = calendarDefault.get(Calendar.MINUTE);
     private boolean mIsToday;
     private int mPlusHour;
 
@@ -146,12 +147,12 @@ public class TimetableContainer extends View {
     private int width = 1200;
     private int plusHour = 6;
 
-    public TimetableContainer(Context context) {
+    public TimeTableView(Context context) {
         super(context);
 
     }
 
-    public TimetableContainer(Context context, @Nullable AttributeSet attrs) {
+    public TimeTableView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
 
         mContext = context;
@@ -227,6 +228,10 @@ public class TimetableContainer extends View {
 //            mIOnClickEventItem.updateCurrentTime();
         }
 
+    }
+
+    public void setCalendar(Locale locale) {
+        this.calendarDefault = Calendar.getInstance(locale);
     }
 
     public void setmStageList(List<Stage> mStageList) {
@@ -455,7 +460,7 @@ public class TimetableContainer extends View {
 
     private void drawCurrentTimeIndicator(Canvas canvas) {
         float startX, startY;
-        Calendar timeCurrent = Calendar.getInstance();
+        Calendar timeCurrent = Calendar.getInstance(Locale.JAPAN);
         int currentHourIn24Format = timeCurrent.get(Calendar.HOUR_OF_DAY);
         int currentMinute = timeCurrent.get(Calendar.MINUTE);
 
@@ -586,7 +591,7 @@ public class TimetableContainer extends View {
                             mDefaultCornerRadius,
                             _mPaint);
 
-                    //Draw name of fes event center rectangle
+                    //Draw name of Event fit in rectangle
                     _mPaint = setStyleText(fesEvent.getIdType());
                     _mPaint.setTextAlign(Paint.Align.CENTER);
 //                drawTextCenterOfRect(canvas, _mPaint, nameFes, left, top, width_rect, height_rect);
@@ -597,7 +602,6 @@ public class TimetableContainer extends View {
                                 top + height_rect / 2 + (mTextTitleStage / 2), textWidth, value);
                     }
 
-                    //Draw time begin and time end of fes event
                     _mPaint.setColor(Color.WHITE);
                     _mPaint.setTextAlign(Paint.Align.LEFT);
                     _mPaint.setStrokeWidth(1);
@@ -605,13 +609,10 @@ public class TimetableContainer extends View {
                     canvas.drawText(fesEvent.getmStartEvent(), left + 10, top + 20, _mPaint);
                     canvas.drawText(fesEvent.getmEndEvent(), left + 10, top + height_rect - 10, _mPaint);
 
-                    //add rect fes to the list mFesEventOfRectF
                     mEventRectList.add(new EventRectF(rectF, fesEvent));
                 }
             }
         }
-
-
     }
 
     /**
@@ -638,15 +639,15 @@ public class TimetableContainer extends View {
         Paint _mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         _mPaint.setStrokeWidth(2);
         switch (idStyle) {
-            case 0:
+            case EVENT_NORMAL:
                 _mPaint.setStyle(Paint.Style.STROKE);
                 _mPaint.setColor(Color.WHITE);
                 break;
-            case 1:
+            case EVENT_WATCH:
                 _mPaint.setStyle(Paint.Style.STROKE);
                 _mPaint.setColor(getResources().getColor(R.color.colorAccent));
                 break;
-            case 2:
+            case EVENT_FAVORITE:
                 _mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
                 _mPaint.setColor(getResources().getColor(R.color.colorAccent));
                 break;
@@ -664,13 +665,13 @@ public class TimetableContainer extends View {
         _mPaint.setStyle(Paint.Style.FILL);
         _mPaint.setTextSize(27);
         switch (idStyle) {
-            case 0:
+            case EVENT_NORMAL:
                 _mPaint.setColor(Color.WHITE);
                 break;
-            case 1:
+            case EVENT_WATCH:
                 _mPaint.setColor(getResources().getColor(R.color.colorAccent));
                 break;
-            case 2:
+            case EVENT_FAVORITE:
                 _mPaint.setColor(Color.WHITE);
                 break;
         }
@@ -757,9 +758,9 @@ public class TimetableContainer extends View {
 
     /**
      * @param top    location top
-     * @param canvas canvas obj
+     * @param canvas canvas object
      * @param i      time hour
-     *               draw text time ruler
+     *               Draw text time ruler
      */
     private void drawTextTime(int top, Canvas canvas, int i) {
         Paint paintTextCounter = new Paint();
@@ -772,7 +773,6 @@ public class TimetableContainer extends View {
             paintTextCounter.setColor(getResources().getColor(R.color.colorAccent));
             i = i % 24;
         }
-
         Rect bounds = new Rect();
         String value = checkTime(i);
         paintTextCounter.getTextBounds(value, 0, value.length(), bounds);
@@ -789,7 +789,7 @@ public class TimetableContainer extends View {
     }
 
     /**
-     * draw O'clock Bitmap
+     * Draw O'clock Bitmap at Top-Left of TimeTable
      */
     private void drawIconBitmapOlockAtTopLeftTimeTable(Canvas canvas) {
         Paint paintOclock = new Paint();
@@ -825,139 +825,6 @@ public class TimetableContainer extends View {
         drawable.draw(canvas);
 
         return bitmap;
-    }
-
-
-    private void drawEvent(Canvas canvas, float top, int i, int dx) {
-//        RectF rectF;
-//        for (int j = 0; j < mStages.size(); j++) {
-//            Stage stage = mStages.get(j);
-//            if (stage.getEvents() != null && stage.getEvents().size() != 0) {
-//                for (int k = 0; k < stage.getEvents().size(); k++) {
-//                    EventLog.Event event = stage.getEvents().get(k);
-//                    if (mTimetableContainerType != TimetableContainerType.TIME_TABLE_MY_FES ||
-//                            (mTimetableContainerType == TimetableContainerType.TIME_TABLE_MY_FES && event.isWatched())) {
-//                        int timeHourStart = TimerUtils.getHourFromString(event.getStartAt());
-//                        int timeHourEnd = TimerUtils.getHourFromString(event.getEndAt());
-//                        int timeMinStart = TimerUtils.getMinFromString(event.getStartAt());
-//                        int timeMinEnd = TimerUtils.getMinFromString(event.getEndAt());
-//
-//                        if (timeHourStart == i) {
-//
-//                            float dy = top + ((timeMinStart * mNormalDistance) / 10);
-//
-//                            float lastDy = top + mHeightEachEvent * (timeHourEnd - timeHourStart)
-//                                    + ((timeMinEnd * mNormalDistance) / 10);
-//                            rectF = new RectF();
-//                            rectF.bottom = (int) lastDy - AppUtils.dipToPx(mContext, 0.5f);
-//
-//                            float widthForMM20 = mWidthEachEvent / (float) event.getKey();
-//                            if (mTimetableContainerType == TimetableContainerType.TIME_TABLE_MY_FES) {
-//                                rectF.left = dx + widthForMM20 * (event.getColumnLevelTimeTable() - 1) + AppUtils.dipToPx(mContext, 0.5f);
-//                            } else {
-//                                rectF.left = dx + mWidthEachEvent * (stage.getKey() - 1) + AppUtils.dipToPx(mContext, 0.5f);
-//                            }
-//
-//                            if (mTimetableContainerType == TimetableContainerType.TIME_TABLE_MY_FES) {
-//                                rectF.right = rectF.left + widthForMM20;
-//                            } else {
-//                                rectF.right = dx + mWidthEachEvent * stage.getKey();
-//                            }
-//                            rectF.right -= AppUtils.dipToPx(mContext, 0.5f);
-//                            rectF.top = (int) dy + AppUtils.dipToPx(mContext, 0.5f);
-//                            if (mEventRectList != null && mEventRectList.size() > 0) {
-//                                for (EventRect eventRect : mEventRectList) {
-//                                    if (eventRect.getEvent() == event) {
-//                                        eventRect.setRect(rectF);
-//                                    }
-//                                }
-//                            }
-//
-//                            String title;
-//                            String timeStart = getTimeOver24(event.getStartAt());
-//                            String timeEnd = getTimeOver24(event.getEndAt());
-//                            Rect timeBounds = new Rect();
-//                            checkFavoriteEvent(event);
-//
-//                            if (event.isFavorite()) {
-//                                if (event.isWatched()) {
-//                                    canvas.drawRoundRect(rectF, mDefaultCornerRadius, mDefaultCornerRadius, mPaintEventWatch);
-//                                } else {
-//                                    canvas.drawRoundRect(rectF, mDefaultCornerRadius, mDefaultCornerRadius, mPaintEventFavorite);
-//                                }
-//                            } else if (event.isWatched()) {
-//                                canvas.drawRoundRect(rectF, mDefaultCornerRadius, mDefaultCornerRadius, mPaintEventWatch);
-//                            } else {
-//                                canvas.drawRoundRect(rectF, mDefaultCornerRadius, mDefaultCornerRadius, mPaintEventNormal);
-//                            }
-//
-//                            mPaintTimeText.getTextBounds(timeStart, 0, timeStart.length(), timeBounds);
-//
-//                            canvas.drawText(timeStart, rectF.left + (timeBounds.width() / 4),
-//                                    dy + (timeBounds.height() / 2) + (mTextTimeEvent),
-//                                    mPaintTimeText);
-//                            List<Artist> artists = new ArrayList<>();
-//                            artists.addAll(event.getArtists());
-//                            int sizeArtists = artists.size();
-//
-//                            float positionX;
-//                            if (mTimetableContainerType == TimetableContainerType.TIME_TABLE_MY_FES) {
-//                                positionX = rectF.left + (mWidthEachEvent / event.getKey() / 2);
-//                            } else {
-//                                positionX = rectF.left + (mWidthEachEvent / 2);
-//                            }
-//
-//                            /* Draw EventArtistsBox. */
-//                            // Artist Rectangle.
-//                            float padding = 5;
-//                            float verticalMargin = 0;
-//                            // EventArtistsBox template.
-//                            Rect artistRectDummy = new Rect();
-//                            mPaintEventTitleText.getTextBounds(artists.get(0).getName(),
-//                                    0, artists.get(0).getName().length(), artistRectDummy);
-//                            // EventArtist total.
-//                            int artistCnt = (int) (rectF.height() / (artistRectDummy.height() + padding * 2));
-//                            // EventArtistDisplayed total.
-//                            int totalLine = (artistCnt < sizeArtists) ? artistCnt : sizeArtists;
-//                            // If EventArtistsBox too height (EventArtist quantity << EventArtistDisplayed total,
-//                            // set vertical margin to display at centre.
-//                            if (rectF.height() > totalLine * (artistRectDummy.height() + padding * 2)) {
-//                                verticalMargin = (rectF.height() - totalLine * (artistRectDummy.height() + padding * 2)) / 2;
-//                            }
-//                            // Draw EventArtistsBox.
-//                            for (int l = 0; l < totalLine; l++) {
-//                                // Check & Set Text color.
-//                                if (artists.get(l).isFavorite() && !event.isWatched()) {
-//                                    // In [current artist is favorite & event is not watched] case, Text color = [pink].
-//                                    mPaintEventTitleText.setColor(getResources().getColor(R.color.colorAccent));
-//                                } else {
-//                                    // In other cases, Text color = [white].
-//                                    mPaintEventTitleText.setColor(Color.WHITE);
-//                                }
-//                                // Get current artist display box.
-//                                Rect rect = new Rect();
-//                                mPaintEventTitleText.getTextBounds(artists.get(0).getName(),
-//                                        0, artists.get(0).getName().length(), rect);
-//                                // Get the position of current artist display box.
-//                                float y = verticalMargin + rectF.top + (l * (rect.height() + padding * 2)) + padding + rect.height();
-//                                // Measure DisplayArtistName.
-//                                int ArtistNameEndPos = mPaintEventTitleText.breakText(artists.get(l).getName().toCharArray(), 0,
-//                                        artists.get(l).getName().length(), rectF.width() - padding * 2, null);
-//                                // Draw current artist display box.
-//                                canvas.drawText(artists.get(l).getName(), 0, ArtistNameEndPos, positionX,
-//                                        y, mPaintEventTitleText);
-//                            }
-//
-//                            /* Draw EventTimeEnd. */
-//                            canvas.drawText(timeEnd, rectF.left + (timeBounds.width() / 4),
-//                                    lastDy - (timeBounds.height()) + (mTextTimeEvent / 4),
-//                                    mPaintTimeText);
-//
-//                        }
-//                    }
-//                }
-//            }
-//        }
     }
 
     private void checkFavoriteEvent(Event event) {
@@ -1115,11 +982,11 @@ public class TimetableContainer extends View {
                 case HORIZONTAL:
                     float mXScrollingSpeed = 1f;
                     mCurrentOrigin.x -= distanceX * mXScrollingSpeed;
-                    ViewCompat.postInvalidateOnAnimation(TimetableContainer.this);
+                    ViewCompat.postInvalidateOnAnimation(TimeTableView.this);
                     break;
                 case VERTICAL:
                     mCurrentOrigin.y -= distanceY;
-                    ViewCompat.postInvalidateOnAnimation(TimetableContainer.this);
+                    ViewCompat.postInvalidateOnAnimation(TimeTableView.this);
                     break;
             }
             return true;
@@ -1127,7 +994,7 @@ public class TimetableContainer extends View {
 
         @Override
         public boolean onDoubleTapEvent(MotionEvent e) {
-            //focus to head of container
+            //Focus to Head of Container
             mCurrentOrigin.x = 0;
             mCurrentOrigin.y = 0;
             return true;
@@ -1200,18 +1067,6 @@ public class TimetableContainer extends View {
         return transcureTime > DOUBLE_CLICK_TIME_DELTA;
     }
 
-    private void detectRectFOfEventAtTouch(float posX, float posY) {
-        Random rand = new Random();
-        int timeCount = rand.nextInt(3);
-        for (EventRectF fesEventRectF : mEventRectList) {
-            RectF rectF = fesEventRectF.getmRectFEvent();
-            if (rectF.contains(posX + getScrollX(), posY + getScrollY())) {
-
-                Toast.makeText(getContext(), timeCount + "Touch at " + fesEventRectF.getmEvent().getmNameEvent(), Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
@@ -1229,68 +1084,13 @@ public class TimetableContainer extends View {
         invalidate();
     }
 
-    public void drawTextTime() {
-        rightNow = Calendar.getInstance(Locale.JAPAN);
-        currentHour = rightNow.get(Calendar.HOUR_OF_DAY) + mPlusHour;
-        currentMin = rightNow.get(Calendar.MINUTE);
-        invalidate();
-    }
-
-//    public void updateOffset(String timeEvent, int artistId) {
-//        if (TextUtils.isEmpty(timeEvent)) {
-//            timeEvent = "";
-//        }
-//        Log.e("xxx", "updateOffset: " + timeEvent);
-//        int hourEvent = !timeEvent.equals("") ? Integer.parseInt(timeEvent.substring(11, 13)) : -1;
-//        int minEvent = !timeEvent.equals("") ? Integer.parseInt(timeEvent.substring(14, 16)) : -1;
-//        int starthour = Integer.MAX_VALUE;
-//        int endhour = 0;
-//        Event event = null;
-//        if (hourEvent > 0) {
-//            starthour = hourEvent;
-//            endhour = minEvent;
-//            for (int j = 0; j < mStages.size(); j++) {
-//                if (mStages.get(j).getEvents() != null && mStages.get(j).getEvents().size() != 0) {
-//                    for (int k = 0; k < mStages.get(j).getEvents().size(); k++) {
-//                        if (TimerUtils.getHourFromString(mStages.get(j).getEvents().get(k).getStartAt()) == hourEvent) {
-//                            List<Artist> artists = mStages.get(j).getEvents().get(k).getArtists();
-//                            for (Artist artist : artists) {
-//                                if (artist.getId() == artistId) {
-//                                    event = mStages.get(j).getEvents().get(k);
-//                                    if (mTimetableContainerType == TimetableContainerType.TIME_TABLE_ALL_STAGE) {
-//                                        mIOnClickEventItem.clickEventItem(event);
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        } else {
-//            for (int j = 0; j < mStages.size(); j++) {
-//                if (mStages.get(j).getEvents() != null && mStages.get(j).getEvents().size() != 0) {
-//                    for (int k = 0; k < mStages.get(j).getEvents().size(); k++) {
-//                        int timeHourStart = TimerUtils.getHourFromString(mStages.get(j).getEvents().get(k).getStartAt());
-//                        int timeMinStart = TimerUtils.getMinFromString(mStages.get(j).getEvents().get(k).getStartAt());
-//                        if (timeHourStart < starthour) {
-//                            starthour = timeHourStart;
-//                            endhour = timeMinStart;
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        updateHeight(starthour, endhour);
-//
-//    }
-
     private void updateHeight(int starthour, int endhour) {
         if (starthour != Integer.MAX_VALUE) {
             mStoreOffet = (starthour - 1) * mHeightEachEvent - (endhour / 10 * mHeightEachEvent / mMaximumStage);
         }
         if (mStoreOffet > 0) {
             mCurrentOrigin.y -= mStoreOffet;
-            ViewCompat.postInvalidateOnAnimation(TimetableContainer.this);
+            ViewCompat.postInvalidateOnAnimation(TimeTableView.this);
         }
     }
 

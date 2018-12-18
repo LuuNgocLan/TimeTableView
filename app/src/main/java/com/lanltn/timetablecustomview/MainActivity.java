@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements TimetableContaine
         mStageList.add(new Stage("FIELD OF HEAVEN", mListEvent));
 
         mListEvent = new ArrayList<>();
-        mListEvent.add(new Event("GALLANT", "00:00", "01:00", 0));
+        mListEvent.add(new Event("GALLANT bvbxvcsbhc ", "00:00", "01:00", 0));
         mListEvent.add(new Event("SOCCER", "03:30", "04:00", 1));
         mListEvent.add(new Event("THE BACK", "05:00", "06:00", 2));
         mListEvent.add(new Event("CATFISH", "8:00", "9:30", 0));
